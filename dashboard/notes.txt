@@ -1,0 +1,2 @@
+//Link k liye:
+import { Link } from "react-router-dom";
