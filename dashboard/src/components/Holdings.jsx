@@ -1,6 +1,4 @@
-import {holdingsWithML} from '../data/dataML';
-
-
+import { holdingsWithML } from "../data/dataML";
 
 const Holdings = () => {
   return (
@@ -9,37 +7,42 @@ const Holdings = () => {
 
       <div className="order-table">
         <table>
-          <tr>
-            <th>Instrument</th>
-            <th>Qty.</th>
-            <th>Avg. cost</th>
-            <th>LTP</th>
-            <th>Cur. val</th>
-            <th>P&L</th>
-            <th>Net chg.</th>
-            <th>Day chg.</th>
-          </tr>
-          {holdingsWithML.map((stock, index)=>{
-            const curValue = stock.price * stock.quantity;
-            const isProfit = curValue - stock.avg_price * stock.quantity>=0.0;
-            const profitClass = isProfit ? "profit" : "loss";//where profit and loss are css classes
-            const dayClass = stock.isLoss ? "loss" : "profit";//same as above
+          <thead>
+            <tr>
+              <th>Instrument</th>
+              <th>Qty.</th>
+              <th>Avg. cost</th>
+              <th>LTP</th>
+              <th>Cur. val</th>
+              <th>P&L</th>
+              <th>Net chg.</th>
+              <th>Day chg.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {holdingsWithML.map((stock, index) => {
+              const curValue = stock.price * stock.quantity;
+              const isProfit =
+                curValue - stock.avg_price * stock.quantity >= 0.0;
+              const profitClass = isProfit ? "profit" : "loss"; //where profit and loss are css classes
+              const dayClass = stock.isLoss ? "loss" : "profit"; //same as above
 
-            return(
-            <tr key={index}>
-            <td>{stock.name}</td>
-            <td>{stock.quantity}</td>
-            <td>{stock.avg_price.toFixed(2)}</td>
-            <td>{stock.price.toFixed(2)}</td>
-            <td>{curValue.toFixed(2)}</td>
-            <td className={profitClass}>
-              {(curValue-stock.avg_price *stock.quantity).toFixed(2)}
-            </td>
-            <td className={profitClass}>{stock.net}%</td>
-            <td className={dayClass}>{stock.day}%</td>
-            </tr> 
+              return (
+                <tr key={index}>
+                  <td>{stock.name}</td>
+                  <td>{stock.quantity}</td>
+                  <td>{stock.avg_price.toFixed(2)}</td>
+                  <td>{stock.price.toFixed(2)}</td>
+                  <td>{curValue.toFixed(2)}</td>
+                  <td className={profitClass}>
+                    {(curValue - stock.avg_price * stock.quantity).toFixed(2)}
+                  </td>
+                  <td className={profitClass}>{stock.net}%</td>
+                  <td className={dayClass}>{stock.day}%</td>
+                </tr>
               );
-          })}
+            })}
+          </tbody>
         </table>
       </div>
 

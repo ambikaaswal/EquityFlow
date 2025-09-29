@@ -732,6 +732,11 @@ hr {
   cursor: pointer;
 }
 
+.tooltip{
+  display: flex;
+  flex-wrap: wrap;
+}
+
 .buy {
   background-color: #4184f3;
   color: #fff;

@@ -91,7 +91,7 @@ export const holdings = [
     avg: 1350.5,
     price: 1555.45,
     net: 15.18,
-    day: -1.60,
+    day: -1.6,
     isLoss: true,
   },
   {
@@ -100,7 +100,7 @@ export const holdings = [
     avg: 202.0,
     price: 207.9,
     net: 2.92,
-    day: 0.80,
+    day: 0.8,
   },
   {
     name: "KPITTECH",
@@ -201,27 +201,104 @@ export const watchlistWithML = [
   {
     name: "INFY",
     price: 1555.45,
-    percent: -1.60,
+    percent: -1.6,
     isDown: true,
-    
+
     // ML fields populated in Phase 2
     mlRecommendation: "BUY",
     confidence: 0.78,
-    predictedPrice: 1620.00,
+    predictedPrice: 1620.0,
     aiReason: "Technical indicators show oversold conditions",
-    autoTradeEnabled: true
+    autoTradeEnabled: true,
   },
   {
     name: "RELIANCE",
     price: 2112.4,
     percent: 1.44,
     isDown: false,
-    
+
     mlRecommendation: "HOLD",
     confidence: 0.65,
-    predictedPrice: 2150.00,
+    predictedPrice: 2150.0,
     aiReason: "Moderate bullish sentiment with energy sector growth",
-    autoTradeEnabled: false
+    autoTradeEnabled: false,
+  },
+  {
+    name: "ONGC",
+    price: 116.8,
+    percent: -0.09,
+    isDown: true,
+    mlRecommendation: "SELL",
+    confidence: 0.52,
+    predictedPrice: 110.0,
+    aiReason: "Weak momentum and declining oil prices",
+    autoTradeEnabled: false,
+  },
+{
+    name: "TCS",
+    price: 3194.8,
+    percent: -0.25,
+    isDown: true,
+    mlRecommendation: "BUY",
+    confidence: 0.81,
+    predictedPrice: 3300.0,
+    aiReason: "Strong fundamentals and positive IT sector outlook",
+    autoTradeEnabled: true,
+  },
+  {
+    name: "KPITTECH",
+    price: 266.45,
+    percent: 3.54,
+    isDown: false,
+    mlRecommendation: "HOLD",
+    confidence: 0.68,
+    predictedPrice: 270.0,
+    aiReason: "Recent surge suggests short-term consolidation",
+    autoTradeEnabled: false,
+  },
+{
+    name: "QUICKHEAL",
+    price: 308.55,
+    percent: -0.15,
+    isDown: true,
+    mlRecommendation: "SELL",
+    confidence: 0.49,
+    predictedPrice: 295.0,
+    aiReason: "Low volume and weak cybersecurity sector performance",
+    autoTradeEnabled: false,
+  },
+  {
+    name: "WIPRO",
+    price: 577.75,
+    percent: 0.32,
+    isDown: false,
+    mlRecommendation: "BUY",
+    confidence: 0.74,
+    predictedPrice: 600.0,
+    aiReason: "Improving margins and strong Q2 guidance",
+    autoTradeEnabled: true,
+  },
+{
+    name: "M&M",
+    price: 779.8,
+    percent: -0.01,
+    isDown: true,
+    mlRecommendation: "HOLD",
+    confidence: 0.61,
+    predictedPrice: 785.0,
+    aiReason: "Stable auto demand but mixed rural indicators",
+    autoTradeEnabled: false,
+  },
+  {
+    name: "HUL",
+    price: 512.4,
+    percent: 1.04,
+    isDown: false,
+    mlRecommendation: "BUY",
+    confidence: 0.83,
+    predictedPrice: 540.0,
+    aiReason: "Strong FMCG demand and seasonal uptick",
+    autoTradeEnabled: true,
   },
 ];
 
@@ -231,28 +308,28 @@ export const holdingsWithML = [
     quantity: 2,
     avg_price: 538.05,
     price: 541.15,
-    net: 6.20,
-    day: 32.40,
+    net: 6.2,
+    day: 32.4,
     isLoss: false,
 
     mlSuggestion: null,
     riskScore: null,
     performancePrediction: null,
-    autoRebalance: false
+    autoRebalance: false,
   },
   {
     name: "HDFCBANK",
     quantity: 2,
     avg_price: 1383.4,
     price: 1522.35,
-    net: 277.90,
+    net: 277.9,
     day: 3.05,
     isLoss: false,
 
     mlSuggestion: null,
     riskScore: null,
     performancePrediction: null,
-    autoRebalance: false
+    autoRebalance: false,
   },
   {
     name: "HINDUNILVR",
@@ -266,7 +343,7 @@ export const holdingsWithML = [
     mlSuggestion: null,
     riskScore: null,
     performancePrediction: null,
-    autoRebalance: false
+    autoRebalance: false,
   },
   {
     name: "INFY",
@@ -274,27 +351,27 @@ export const holdingsWithML = [
     avg_price: 1350.5,
     price: 1555.45,
     net: 204.95,
-    day: -25.20,
+    day: -25.2,
     isLoss: true,
 
     mlSuggestion: null,
     riskScore: null,
     performancePrediction: null,
-    autoRebalance: false
+    autoRebalance: false,
   },
   {
     name: "ITC",
     quantity: 5,
     avg_price: 202.0,
     price: 207.9,
-    net: 29.50,
+    net: 29.5,
     day: 8.32,
     isLoss: false,
 
     mlSuggestion: null,
     riskScore: null,
     performancePrediction: null,
-    autoRebalance: false
+    autoRebalance: false,
   },
   {
     name: "KPITTECH",
@@ -308,63 +385,63 @@ export const holdingsWithML = [
     mlSuggestion: null,
     riskScore: null,
     performancePrediction: null,
-    autoRebalance: false
+    autoRebalance: false,
   },
   {
     name: "M&M",
     quantity: 2,
     avg_price: 809.9,
     price: 779.8,
-    net: -60.20,
+    net: -60.2,
     day: -0.16,
     isLoss: true,
 
     mlSuggestion: null,
     riskScore: null,
     performancePrediction: null,
-    autoRebalance: false
+    autoRebalance: false,
   },
   {
     name: "RELIANCE",
     quantity: 1,
     avg_price: 2193.7,
     price: 2112.4,
-    net: -81.30,
+    net: -81.3,
     day: 30.42,
     isLoss: false,
 
     mlSuggestion: null,
     riskScore: null,
     performancePrediction: null,
-    autoRebalance: false
+    autoRebalance: false,
   },
   {
     name: "SBIN",
     quantity: 4,
     avg_price: 324.35,
     price: 430.2,
-    net: 423.40,
+    net: 423.4,
     day: -5.86,
     isLoss: true,
 
     mlSuggestion: null,
     riskScore: null,
     performancePrediction: null,
-    autoRebalance: false
+    autoRebalance: false,
   },
   {
     name: "SGBMAY29",
     quantity: 2,
     avg_price: 4727.0,
     price: 4719.0,
-    net: -16.00,
+    net: -16.0,
     day: 14.22,
     isLoss: false,
 
     mlSuggestion: null,
     riskScore: null,
     performancePrediction: null,
-    autoRebalance: false
+    autoRebalance: false,
   },
   {
     name: "TATAPOWER",
@@ -378,53 +455,71 @@ export const holdingsWithML = [
     mlSuggestion: null,
     riskScore: null,
     performancePrediction: null,
-    autoRebalance: false
+    autoRebalance: false,
   },
   {
     name: "TCS",
     quantity: 1,
     avg_price: 3041.7,
     price: 3194.8,
-    net: 153.10,
+    net: 153.1,
     day: -8.04,
     isLoss: true,
 
     mlSuggestion: null,
     riskScore: null,
     performancePrediction: null,
-    autoRebalance: false
+    autoRebalance: false,
   },
   {
     name: "WIPRO",
     quantity: 4,
     avg_price: 489.3,
     price: 577.75,
-    net: 353.80,
-    day: 7.40,
+    net: 353.8,
+    day: 7.4,
     isLoss: false,
 
     mlSuggestion: null,
     riskScore: null,
     performancePrediction: null,
-    autoRebalance: false
-  }
+    autoRebalance: false,
+  },
 ];
 
 export const positionsWithML = [
   {
     product: "CNC",
     name: "EVEREADY",
-    qty: 2,
+    quantity: 2,
     avg_price: 316.27,
+    price: 308.65,
     net: -7.84,
     day: -7.84,
     isLoss: true,
-    
+
     // ML fields populated
     isAutomated: true, // This was an AI trade
     exitStrategy: "Stop loss at 300 or target at 340",
-    stopLoss: 300.00,
-    targetPrice: 340.00,
-    mlTriggered: true
-  }
+    stopLoss: 300.0,
+    targetPrice: 340.0,
+    mlTriggered: true,
+  },
+  {
+    product: "CNC",
+    name: "JUBLFOOD",
+    quantity: 1,
+    avg_price: 3124.75,
+    price: 3082.65,
+    net: 10.04,
+    day: -1.35,
+    isLoss: true,
+
+    // ML fields populated
+    isAutomated: true, // This was an AI trade
+    exitStrategy: "idk",
+    stopLoss: 3000.0,
+    targetPrice: 3400.0,
+    mlTriggered: true,
+  },
 ];
