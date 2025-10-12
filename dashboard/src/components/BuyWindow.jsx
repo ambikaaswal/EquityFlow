@@ -11,15 +11,16 @@ const BuyWindow = ({ uid, mode }) => {
   const [stockPrice, setStockPrice] = useState(0.0);
 
   const { closeBuyWindow } = useContext(GeneralContext);
-  // const {openBuyWindow} = useContext(GeneralContext);
+  const {refreshHoldings } = useContext(GeneralContext);
 
-  const handleBuySellHoldClick = () => {
-    axios.post("http://localhost:8000/newOrder", {
+  const handleBuySellHoldClick = async() => {
+    await axios.post("http://localhost:8000/newOrder", {
       name: uid,
       quantity: stockQuantity,
       price: stockPrice,
       action: mode,
-    })
+    });
+    refreshHoldings();
     closeBuyWindow();
   };
 

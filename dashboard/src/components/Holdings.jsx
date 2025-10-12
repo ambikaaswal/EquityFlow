@@ -1,17 +1,25 @@
 // import { holdingsWithML } from "../data/dataML";
 
-import { useState, useEffect } from "react";
-import axios from 'axios';
+import { useEffect, useContext } from "react";
+// import axios from 'axios';
+import GeneralContext from "./GeneralContext";
 
 //data  from database:
 const Holdings = () => {
-  const [allHoldings, setAllHoldings] = useState([]);
+  // const [allHoldings, setAllHoldings] = useState([]);
+  // useEffect(()=>{
+  //   axios.get("http://localhost:8000/allHoldings").then((res)=>{
+  //     // console.log(res.data);
+  //     setAllHoldings(res.data);
+  //   })
+  // },[]); //[] se ek hi baar run hoga.
+
+  const {allHoldings, refreshHoldings} = useContext(GeneralContext);
+
   useEffect(()=>{
-    axios.get("http://localhost:8000/allHoldings").then((res)=>{
-      // console.log(res.data);
-      setAllHoldings(res.data);
-    })
-  },[]); //[] se ek hi baar run hoga.
+  refreshHoldings();
+  },[]);
+
   return (
     <>
       <h3 className="title">Holdings ({allHoldings.length})</h3>

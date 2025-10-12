@@ -317,7 +317,6 @@ app.get("/allPositions",async(req,res)=>{
 //to get new order:
 const {OrdersModel}  = require('./models/OrdersModel');
 app.post('/newOrder', async(req,res)=>{
-    console.log("POST /newOrder triggered");
     let newOrder = new OrdersModel({
         name: req.body.name,
         quantity: req.body.quantity,

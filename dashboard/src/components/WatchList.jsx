@@ -108,7 +108,7 @@ const WatchListAction = ({ uid }) => {
           arrow
           slots={{ transition: Grow }}
         >
-          <button className="track" onClick={() => openBuyWindow(uid, "TRACK")}>
+          <button className="track">
             Track
           </button>
         </Tooltip>
