@@ -11,7 +11,7 @@ const HoldingsSchema = new Schema({
 
     mlSuggestion: { 
         type: String, 
-        enum: ['HOLD', 'SELL', 'BUY_MORE'],
+        enum: ['HOLD', 'SELL', 'BUY', 'TRACK'],
         default: null 
     },
     riskScore: { type: Number, min: 1, max: 10, default: null },

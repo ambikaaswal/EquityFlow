@@ -1,0 +1,22 @@
+//Frontend:
+npm create vite@latest
+
+//react router for multiple pages:
+npm i react-router-dom
+
+
+
+dashboard changes:
+"Create a dashboard mockup similar to this, but focused on:
+- AI trading recommendations instead of manual trades
+- Automation controls and ML confidence scores
+- Portfolio managed by AI with user override options
+- EquityFlow branding instead of Zerodha"
+
+Quick Tweaks for Your Version:
+
+Replace "Manual funds" sidebar with "AI Strategies"
+Change buy/sell buttons to "Auto Trading: ON/OFF"
+Add ML prediction panels
+Show "AI Confidence" instead of just prices
+Add "Override Trade" buttons

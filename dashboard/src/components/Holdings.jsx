@@ -1,9 +1,20 @@
-import { holdingsWithML } from "../data/dataML";
+// import { holdingsWithML } from "../data/dataML";
 
+import { useState, useEffect } from "react";
+import axios from 'axios';
+
+//data  from database:
 const Holdings = () => {
+  const [allHoldings, setAllHoldings] = useState([]);
+  useEffect(()=>{
+    axios.get("http://localhost:8000/allHoldings").then((res)=>{
+      // console.log(res.data);
+      setAllHoldings(res.data);
+    })
+  },[]); //[] se ek hi baar run hoga.
   return (
     <>
-      <h3 className="title">Holdings ({holdingsWithML.length})</h3>
+      <h3 className="title">Holdings ({allHoldings.length})</h3>
 
       <div className="order-table">
         <table>
@@ -20,13 +31,12 @@ const Holdings = () => {
             </tr>
           </thead>
           <tbody>
-            {holdingsWithML.map((stock, index) => {
+            {allHoldings.map((stock, index) => {
               const curValue = stock.price * stock.quantity;
               const isProfit =
-                curValue - stock.avg_price * stock.quantity >= 0.0;
+              curValue - stock.avg_price * stock.quantity >= 0.0;
               const profitClass = isProfit ? "profit" : "loss"; //where profit and loss are css classes
               const dayClass = stock.isLoss ? "loss" : "profit"; //same as above
-
               return (
                 <tr key={index}>
                   <td>{stock.name}</td>

@@ -1,0 +1,31 @@
+npm init se initialised.
+removed text in scripts in package.json
+added "start":"nodemon.js"
+To install nodemon:
+npm i -D nodemon
+other utilities:
+npm i express body-parser cors dotenv mongoose passport passport-local passport-local-mongoose
+collection ka naam dene k liye:
+/equityflow?retryWrites i.e, db_url me /and? k beech me naam denge
+
+require("dotenv").config();//env value will go to system process
+
+
+//here mongodb will creste collection named holdings.
+const HoldingModel = new model("holding",HoldingsSchema);
+
+//using vscode extansion instead of postwoman
+it is called thunder client.
+was used to insert hardcoded data here and test api 
+note use http not https.
+ex:http://localhost:8000/addPositions
+extension of postman is also available if you want to use
+
+
+let allHoldings = await HoldingsModel.find({});
+//Mongoose abstracts the collection binding for you. Once you define a model
+//with a name, it automatically knows which collection to query — unless you explicitly override it.
+
+when we are fetching data from database
+we need body parser and cors set up in the backend.
+alongwith axios to fetch data.

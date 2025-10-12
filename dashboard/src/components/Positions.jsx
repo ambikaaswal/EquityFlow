@@ -1,9 +1,19 @@
-import { positionsWithML } from "../data/dataML";
+// import { positionsWithML } from "../data/dataML";
+
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const Positions = () => {
+  const [allPositions, setAllPositions] = useState([]);
+
+  useEffect(()=>{
+    axios.get("http://localhost:8000/allPositions").then((res)=>{
+      setAllPositions(res.data);
+    })
+  },[]);
   return (
     <>
-      <h3 className="title">Positions ({positionsWithML.length})</h3>
+      <h3 className="title">Positions ({allPositions.length})</h3>
       <div className="order-table">
         <table>
           <thead>
@@ -18,7 +28,7 @@ const Positions = () => {
             </tr>
           </thead>
           <tbody>
-            {positionsWithML.map((stock, index) => {
+            {allPositions.map((stock, index) => {
               const curValue = stock.price * stock.quantity;
               const isProfit =
                 curValue - stock.avg_price * stock.quantity >= 0.0;
