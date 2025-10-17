@@ -23,4 +23,4 @@ const HoldingsSchema = new Schema({
     lastMLUpdate: { type: Date, default: null },
     mlVersion: { type: String, default: null } 
 });
-module.exports = {HoldingsSchema}
+module.exports = {HoldingsSchema};

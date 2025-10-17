@@ -1,0 +1,14 @@
+.user{
+    color: rgb(125, 123, 123);
+    border-radius: 1rem;
+    width: 30rem;
+    height: 38rem;
+    padding-top: 0.25rem;
+    padding-left: 0.25rem;
+}
+h4{
+    color:#0d6efd;
+}
+.user:hover{
+    background-color: #edecf0;
+}

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from 'axios';
 import BuyWindow from "./BuyWindow";
-import { holdings } from "../data/dataML";
+// import { holdings } from "../data/dataML";
 
 const GeneralContext = React.createContext({
   openBuyWindow: (uid) => {},

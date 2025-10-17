@@ -1,19 +1,28 @@
-require("dotenv").config();
-
 const express = require("express");
 const mongoose = require("mongoose");
+const app = express();
+require("dotenv").config();
 
-const bodyParser = require('body-parser');
+const cookieParser = require("cookie-parser");
 const cors = require('cors');
 
+const AuthRoute = require("./Routes/AuthRoute");
 
 const PORT = process.env.PORT || 8000;
 const DB_URL = process.env.EQUITYFLOW_DB_URL;
 
-const app = express();
 
-app.use(cors());
-app.use(bodyParser.json());
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // function main(){
 //     mongoose.connect(DB_URL);
@@ -313,7 +322,6 @@ app.get("/allPositions",async(req,res)=>{
     res.json(allPositions);
 });
 
-
 //to get new order:
 const {OrdersModel}  = require('./models/OrdersModel');
 app.post('/newOrder', async(req,res)=>{
@@ -375,17 +383,28 @@ app.post('/newOrder', async(req,res)=>{
     res.send("order saved");
 });
 
+app.use("/", AuthRoute);
+
 //to handle invalid requests:
-app.use("/",async(req,res)=>{
-    res.send("bad request");
-});
+// app.use("/",async(req,res)=>{
+//     res.send("bad request");
+// });
+
+// app.listen(PORT, () => {
+//   console.log("app is listening on port",PORT);
+//   mongoose.connect(DB_URL)
+//   .then(()=> console.log("connected to db") )
+//   .catch((err)=>{
+//     console.log("Failed to connect to database:",err);
+//     process.exit(1);
+//   });
+// });
+
+mongoose
+  .connect(DB_URL)
+  .then(() => console.log("DB is connected successfully"))
+  .catch((err) => console.error(err));
 
 app.listen(PORT, () => {
-  console.log("app is listening on port",PORT);
-  mongoose.connect(DB_URL)
-  .then(()=> console.log("connected to db") )
-  .catch((err)=>{
-    console.log("Failed to connect to database:",err);
-    process.exit(1);
-  });
+  console.log(`Server is listening on port ${PORT}`);
 });

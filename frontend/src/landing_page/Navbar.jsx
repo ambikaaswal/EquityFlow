@@ -18,7 +18,7 @@ function Navbar() {
           aria-expanded="false"
           aria-label="Toggle navigation"
         >
-          <i class="fa-solid fa-list-ul"></i>
+          <i className="fa-solid fa-list-ul"></i>
         </button>
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav ms-auto">
@@ -30,6 +30,11 @@ function Navbar() {
             <li className="nav-item">
               <Link className="nav-link" to="/signup">
                 Signup
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/login">
+                login
               </Link>
             </li>
             <li className="nav-item">
