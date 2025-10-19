@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 module.exports.Signup = async (req, res, next) => {
   // console.log(req.body);
   try {
-    const { email,mobile, password, username, createdAt } = req.body;
+    const { email, mobile, password, username, createdAt } = req.body;
 
     //creates new collection, if it doesn't exist.
     const existingUser = await UsersModel.findOne({ email });
@@ -24,10 +24,9 @@ module.exports.Signup = async (req, res, next) => {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
     const user = await UsersModel.create({
       email,
-      password:hashedPassword,
+      password,
       username,
       mobile,
       createdAt,
@@ -35,7 +34,7 @@ module.exports.Signup = async (req, res, next) => {
     const token = createSecretToken(user._id);
     res.cookie("token", token, {
       withCredentials: true,
-      httpOnly: false,
+      httpOnly: true,//earlier false
     });
     res
       .status(201)
@@ -51,27 +50,40 @@ module.exports.Signup = async (req, res, next) => {
 
 module.exports.Login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.json({ message: "All fields are required" });
+    const { email, mobile, password } = req.body;
+    if (!email || !password || !mobile) {
+      return res.json({ message: "All fields are required", success: false });
     }
     const user = await UsersModel.findOne({ email });
     if (!user) {
-      return res.json({ message: "Incorrect password or email" });
+      return res.json({
+        message: "Incorrect password or emaile",
+        success: false,
+      });
+    }
+    if(user.mobile != mobile)
+    {
+      return res.json({
+        message:"Incorrect mobile number or passwordm",
+        success:false,
+      })
     }
     const auth = await bcrypt.compare(password, user.password);
     if (!auth) {
-      return res.json({ message: "Incorrect password or email" });
+      return res.json({
+        message: "Incorrect password or emailp",
+        success: false,
+      });
     }
     const token = createSecretToken(user._id);
     res.cookie("token", token, {
       withCredentials: true,
-      httpOnly: false,
+      httpOnly: true,//earlier false
     });
     res
       .status(201)
       .json({ message: "User logged in successfully", success: true });
-    next();
+    // next();
   } catch (error) {
     console.error(error);
   }

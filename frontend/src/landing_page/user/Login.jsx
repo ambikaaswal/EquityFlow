@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -55,32 +55,18 @@ const Login = () => {
       ...inputValue,
       email: "",
       password: "",
+      mobile: "",
     });
   };
 
    return (
-      <div className="container my-5 text-center user">
+      <div className="container my-5 text-center login">
         <div className="row mt-5">
           <form onSubmit={handleSubmit}>
             <fieldset>
               <legend>
-                <h4>SignUp</h4>
+                <h4>Login</h4>
               </legend>
-              <div className="col-auto pt-3">
-                <label htmlFor="username" className="col-sm-5 col-form-label">
-                  Username
-                </label>
-                <TextField
-                  id="username"
-                  value={username}
-                  type="text"
-                  name="username"
-                  label="Enter username"
-                  variant="standard"
-                  onChange={handleOnChange}
-                />
-                <br /> <br />
-              </div>
               <div className="col-auto">
                 <label htmlFor="email" className="col-sm-5 col-form-label">
                   Email
@@ -127,24 +113,8 @@ const Login = () => {
                 />{" "}
                 <br /> <br /> <br />
               </div>
-              <div className="col-auto">
-                <label htmlFor="repswrd" className="col-sm-5 col-form-label">
-                  Re-type password
-                </label>
-                <TextField
-                  id="repswrd"
-                  type="password"
-                  name="password2"
-                  label="Enter password"
-                  variant="standard"
-                />{" "}
-                <br /> <br /> <br />
-              </div>
-              <input type="submit" className="btn btn-primary" value="Submit" />{" "}
+              <input type="submit" className="btn btn-primary" value="Login" />{" "}
               <br />
-              <span>
-                Already have an account? <Link to={"/login"}>Login</Link>
-              </span>
             </fieldset>
           </form>
         </div>

@@ -3,6 +3,8 @@
 import { useEffect, useContext } from "react";
 // import axios from 'axios';
 import GeneralContext from "./GeneralContext";
+import { VerticalChart } from "./verticalChart";
+// import { data } from "react-router-dom";
 
 //data  from database:
 const Holdings = () => {
@@ -19,6 +21,20 @@ const Holdings = () => {
   useEffect(()=>{
   refreshHoldings();
   },[]);
+
+// const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+  const labels = allHoldings.map((subArray)=> subArray["name"]);
+
+const data = {
+  labels,
+  datasets: [
+    {
+      label: 'Stock Price',
+      data: allHoldings.map((stock) => stock.price),
+      backgroundColor: 'rgba(99, 135, 255, 0.5)',
+    },
+  ],
+};
 
   return (
     <>
@@ -82,6 +98,9 @@ const Holdings = () => {
           <p>P&L</p>
         </div>
       </div>
+
+      {/* chart */}
+      <VerticalChart data={data}/>
     </>
   );
 };

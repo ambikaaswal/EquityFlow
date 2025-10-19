@@ -61,7 +61,7 @@ function Signup() {
     });
   };
   return (
-    <div className="container my-5 text-center user">
+    <div className="container my-5 text-center signup">
       <div className="row mt-5">
         <form onSubmit={handleSubmit}>
           <fieldset>

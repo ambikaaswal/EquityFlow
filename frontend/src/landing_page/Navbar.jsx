@@ -1,8 +1,16 @@
+import Cookies from "js-cookie";//to know logged in status
+import { useEffect, useState } from "react";
 import './Navbar.css'
 import { Link } from 'react-router-dom';
 
 
 function Navbar() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  useEffect(()=>{
+    const token = Cookies.get("token");
+    setIsLoggedIn(!!token);
+  },[]);
+
   return (
     <nav className="navbar navbar-expand-lg border-bottom py-1">
       <div className="container-fluid px-5">
@@ -33,9 +41,9 @@ function Navbar() {
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/login">
+              {!isLoggedIn &&<Link className="nav-link" to="/login">
                 login
-              </Link>
+              </Link>}
             </li>
             <li className="nav-item">
               <Link className="nav-link" to="/about">
