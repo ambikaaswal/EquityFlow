@@ -1,0 +1,11 @@
+npm init se initialised.
+removed text in scripts in package.json
+added "start":"nodemon.js"
+To install nodemon:
+npm i -D nodemon
+other utilities:
+npm i express body-parser cors dotenv mongoose passport passport-local passport-local-mongoose
+collection ka naam dene k liye:
+/equityflow?retryWrites i.e, db_url me /and? k beech me naam denge
+
+require("dotenv").config();//env value will go to system process
