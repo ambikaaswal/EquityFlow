@@ -13,7 +13,7 @@ const Menu = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
   };
 
-  const menClass = "menu";
+  const menuclass = "menu";
   const activeMenuClass = "menu selected";
 
   return (
@@ -27,7 +27,7 @@ const Menu = () => {
               to="/"
               onClick={() => handleMenuClick(0)}
             >
-              <p className={selectedMenu == 0 ? activeMenuClass : menClass}>
+              <p className={selectedMenu == 0 ? activeMenuClass : menuclass}>
                 Dashboard
               </p>
             </Link>
@@ -38,7 +38,7 @@ const Menu = () => {
               to="/orders"
               onClick={() => handleMenuClick(1)}
             >
-              <p className={selectedMenu == 1 ? activeMenuClass : menClass}>
+              <p className={selectedMenu == 1 ? activeMenuClass : menuclass}>
                 Orders
               </p>
             </Link>
@@ -49,7 +49,7 @@ const Menu = () => {
               to="/holdings"
               onClick={() => handleMenuClick(2)}
             >
-              <p className={selectedMenu == 2 ? activeMenuClass : menClass}>
+              <p className={selectedMenu == 2 ? activeMenuClass : menuclass}>
                 Holdings
               </p>
             </Link>
@@ -60,7 +60,7 @@ const Menu = () => {
               to="/positions"
               onClick={() => handleMenuClick(3)}
             >
-              <p className={selectedMenu == 3 ? activeMenuClass : menClass}>
+              <p className={selectedMenu == 3 ? activeMenuClass : menuclass}>
                 Positions
               </p>
             </Link>
@@ -71,7 +71,7 @@ const Menu = () => {
               to="/funds"
               onClick={() => handleMenuClick(4)}
             >
-              <p className={selectedMenu == 4 ? activeMenuClass : menClass}>
+              <p className={selectedMenu == 4 ? activeMenuClass : menuclass}>
                 Funds
               </p>
             </Link>
@@ -82,7 +82,7 @@ const Menu = () => {
               to="/apps"
               onClick={() => handleMenuClick(5)}
             >
-              <p className={selectedMenu == 5 ? activeMenuClass : menClass}>
+              <p className={selectedMenu == 5 ? activeMenuClass : menuclass}>
                 Apps
               </p>
             </Link>

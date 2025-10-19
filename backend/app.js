@@ -1,11 +1,28 @@
-require("dotenv").config();
-
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
+require("dotenv").config();
+
+const cookieParser = require("cookie-parser");
+const cors = require('cors');
+
+const AuthRoute = require("./Routes/AuthRoute");
 
 const PORT = process.env.PORT || 8000;
 const DB_URL = process.env.EQUITYFLOW_DB_URL;
+
+
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // function main(){
 //     mongoose.connect(DB_URL);
@@ -17,9 +34,9 @@ const DB_URL = process.env.EQUITYFLOW_DB_URL;
 //     console.log(err);
 // });
 
-// const {HoldingsModel} = require("./models/HoldingsModel");
-//dummy data(Holding collection) added to atlas db:
+const {HoldingsModel} = require("./models/HoldingsModel");
 
+//sending data (holdings collection) added to atlas db:
 // app.get("/addHoldings",async(req,res)=>{
 //     let tempHoldings = [
 //   {
@@ -228,7 +245,9 @@ const DB_URL = process.env.EQUITYFLOW_DB_URL;
 //     res.send("done!");
 // });
 
-// const { PositionsModel } = require("./models/PositionsModel");
+const { PositionsModel } = require("./models/PositionsModel");
+
+//sending data (positions collection) added to atlas db:
 // app.get("/addPositions", async (req, res) => {
 //   let tempPositions = [
 //     {
@@ -293,13 +312,99 @@ const DB_URL = process.env.EQUITYFLOW_DB_URL;
 //   res.send("done! positions");
 // });
 
+app.get("/allHoldings",async(req,res)=>{
+    let allHoldings = await HoldingsModel.find({});
+    res.json(allHoldings);
+});
 
-app.use("/",async(req,res)=>{
-    res.send("bad request");
-})
+app.get("/allPositions",async(req,res)=>{
+    let allPositions = await PositionsModel.find({});
+    res.json(allPositions);
+});
+
+//to get new order:
+const {OrdersModel}  = require('./models/OrdersModel');
+app.post('/newOrder', async(req,res)=>{
+    let newOrder = new OrdersModel({
+        name: req.body.name,
+        quantity: req.body.quantity,
+        price: req.body.price,
+        action: req.body.action
+    });
+    // console.log(newOrder);
+    await newOrder.save();
+    const {name, quantity, price, action} = req.body;
+    //find the holding
+    const existingHolding = await HoldingsModel.findOne({name});
+    if(action === "BUY")
+    {
+        //if holding already exists
+        if(existingHolding)
+        {
+            const newQuantity = existingHolding.quantity + quantity;
+            const newCost = (existingHolding.avg_price * existingHolding.quantity) + (price*quantity);
+            const newAvg_price = newCost/newQuantity;
+
+            existingHolding.quantity = newQuantity;
+            existingHolding.avg_price = newAvg_price;
+            existingHolding.price = price;
+            await existingHolding.save();
+        }else
+        {
+            //create new
+            const newHolding = new HoldingsModel({
+                name,
+                quantity,
+                avg_price:price,
+                price,
+                net:0,
+                day:0,
+                isLoss:false
+            });
+            await newHolding.save();
+        }
+    }
+    if(action=="SELL")
+    {
+        if(existingHolding){
+            const newQuantity = existingHolding.quantity - quantity;
+            if(newQuantity>0)
+            {
+                existingHolding.quantity = newQuantity;
+                existingHolding.price = price;
+                await existingHolding.save();
+            }
+            else
+            {
+                await HoldingsModel.deleteOne({name});
+            }
+        }
+    }
+    res.send("order saved");
+});
+
+app.use("/", AuthRoute);
+
+//to handle invalid requests:
+// app.use("/",async(req,res)=>{
+//     res.send("bad request");
+// });
+
+// app.listen(PORT, () => {
+//   console.log("app is listening on port",PORT);
+//   mongoose.connect(DB_URL)
+//   .then(()=> console.log("connected to db") )
+//   .catch((err)=>{
+//     console.log("Failed to connect to database:",err);
+//     process.exit(1);
+//   });
+// });
+
+mongoose
+  .connect(DB_URL)
+  .then(() => console.log("DB is connected successfully"))
+  .catch((err) => console.error(err));
 
 app.listen(PORT, () => {
-  console.log("app is listening on port 8000");
-  mongoose.connect(DB_URL);
-  console.log("connected to db");
+  console.log(`Server is listening on port ${PORT}`);
 });

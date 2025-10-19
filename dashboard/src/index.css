@@ -735,6 +735,7 @@ hr {
 .tooltip{
   display: flex;
   flex-wrap: wrap;
+  background-color: #f1f1f1;
 }
 
 .buy {
@@ -753,6 +754,14 @@ hr {
   border: 0.7px solid #ff5722;
 }
 
+.track{
+  background-color: #69d279;
+  color: #fff;
+  font-weight: 400;
+  font-size: 0.8rem;
+  text-align: center;
+  border: 0.7px solid #69d279;
+}
 .action {
   background-color: #fff;
   border: 0.7px solid #9b9b9b;

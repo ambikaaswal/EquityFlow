@@ -1,0 +1,25 @@
+.signup{
+    color: rgb(125, 123, 123);
+    border-radius: 1rem;
+    width: 30rem;
+    height: 38rem;
+    padding-top: 0.25rem;
+    padding-left: 0.25rem;
+}
+.login{
+    color: rgb(125, 123, 123);
+    border-radius: 1rem;
+    width: 30rem;
+    height: 25rem;
+    padding-top: 0.25rem;
+    padding-left: 0.25rem;
+}
+h4{
+    color:#0d6efd;
+}
+.signup:hover{
+    background-color: #edecf0;
+}
+.login:hover{
+    background-color: #edecf0;
+}

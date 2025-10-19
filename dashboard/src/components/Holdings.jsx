@@ -1,9 +1,44 @@
-import { holdingsWithML } from "../data/dataML";
+// import { holdingsWithML } from "../data/dataML";
 
+import { useEffect, useContext } from "react";
+// import axios from 'axios';
+import GeneralContext from "./GeneralContext";
+import { VerticalChart } from "./verticalChart";
+// import { data } from "react-router-dom";
+
+//data  from database:
 const Holdings = () => {
+  // const [allHoldings, setAllHoldings] = useState([]);
+  // useEffect(()=>{
+  //   axios.get("http://localhost:8000/allHoldings").then((res)=>{
+  //     // console.log(res.data);
+  //     setAllHoldings(res.data);
+  //   })
+  // },[]); //[] se ek hi baar run hoga.
+
+  const {allHoldings, refreshHoldings} = useContext(GeneralContext);
+
+  useEffect(()=>{
+  refreshHoldings();
+  },[]);
+
+// const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+  const labels = allHoldings.map((subArray)=> subArray["name"]);
+
+const data = {
+  labels,
+  datasets: [
+    {
+      label: 'Stock Price',
+      data: allHoldings.map((stock) => stock.price),
+      backgroundColor: 'rgba(99, 135, 255, 0.5)',
+    },
+  ],
+};
+
   return (
     <>
-      <h3 className="title">Holdings ({holdingsWithML.length})</h3>
+      <h3 className="title">Holdings ({allHoldings.length})</h3>
 
       <div className="order-table">
         <table>
@@ -20,13 +55,12 @@ const Holdings = () => {
             </tr>
           </thead>
           <tbody>
-            {holdingsWithML.map((stock, index) => {
+            {allHoldings.map((stock, index) => {
               const curValue = stock.price * stock.quantity;
               const isProfit =
-                curValue - stock.avg_price * stock.quantity >= 0.0;
+              curValue - stock.avg_price * stock.quantity >= 0.0;
               const profitClass = isProfit ? "profit" : "loss"; //where profit and loss are css classes
               const dayClass = stock.isLoss ? "loss" : "profit"; //same as above
-
               return (
                 <tr key={index}>
                   <td>{stock.name}</td>
@@ -64,6 +98,9 @@ const Holdings = () => {
           <p>P&L</p>
         </div>
       </div>
+
+      {/* chart */}
+      <VerticalChart data={data}/>
     </>
   );
 };

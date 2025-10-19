@@ -1,4 +1,0 @@
-//Link k liye:
-import { Link } from "react-router-dom";
-In the watchlist.js:
-import {Tooltip, Grow} from '@mui/material';
