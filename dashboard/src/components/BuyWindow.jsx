@@ -6,20 +6,25 @@ import GeneralContext from "./GeneralContext";
 
 import "./BuyWindow.css";
 
-const BuyWindow = ({ uid, mode }) => {
+const BuyWindow = ({ uid, mode, price }) => {
   const [stockQuantity, setStockQuantity] = useState(1);
-  const [stockPrice, setStockPrice] = useState(0.0);
+  const [stockPrice, setStockPrice] = useState(price);
 
   const { closeBuyWindow } = useContext(GeneralContext);
   const {refreshHoldings } = useContext(GeneralContext);
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
   const handleBuySellHoldClick = async() => {
-    await axios.post("http://localhost:8000/newOrder", {
+    await axios.post(`${BACKEND_URL}/newOrder`, {
       name: uid,
       quantity: stockQuantity,
       price: stockPrice,
       action: mode,
-    });
+    },{
+      withCredentials:true,
+    }
+  );
     refreshHoldings();
     closeBuyWindow();
   };
@@ -29,7 +34,7 @@ const BuyWindow = ({ uid, mode }) => {
   }
 
   return (
-    <div className="container" id="buy-window" draggable="true">
+    <div className="container " id="buy-window" draggable="true">
       <h3 className="title">Choose Action</h3>
       <div className="regular-order">
         <div className="inputs">
@@ -38,6 +43,7 @@ const BuyWindow = ({ uid, mode }) => {
             <input
               type="number"
               name="qty"
+              className=""
               id="qty"
               onChange={(e)=>setStockQuantity(e.target.value)}
               value={stockQuantity}
@@ -58,13 +64,13 @@ const BuyWindow = ({ uid, mode }) => {
       </div>
 
       <div className="buttons">
-        <span>Margin required ₹140.65</span>
+        <span>Margin required {stockPrice}</span>
         <div>
-          <Link className="btn btn-blue" onClick={handleBuySellHoldClick}>
-            {mode}
-          </Link>
-          <Link to="" className="btn btn-grey" onClick={handleCancelClick}>
-            Cancel
+          <Link  onClick={handleBuySellHoldClick}>
+           <button className="w-30 bg-blue-500 p-2 rounded text-white ">{mode}</button>
+          </Link> &nbsp;
+          <Link to="" onClick={handleCancelClick}>
+            <button className="w-30 bg-slate-500 p-2 rounded text-white ">Cancel</button>
           </Link>
         </div>
       </div>

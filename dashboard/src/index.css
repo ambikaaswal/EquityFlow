@@ -1,3 +1,4 @@
+@import "tailwindcss";
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,6 +6,11 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+input {
+  border: none;
+  outline: none;
 }
 
 code {
@@ -202,6 +208,19 @@ code {
   text-align: left;
 }
 
+.holdings:hover{
+  background-color: #c6defa;
+}
+
+.sell {
+  padding: 4px 8px;
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 .order-table td.profit {
   color: rgb(72, 194, 55);
 }
@@ -296,6 +315,7 @@ hr {
 
 .profile {
   display: flex;
+  position: relative;
   align-items: center;
   justify-content: space-evenly;
   margin-left: 20px;
@@ -338,16 +358,36 @@ hr {
   color: rgb(223, 91, 43);
 }
 
+.profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 8px;
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.profile-dropdown button {
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+
 .orders {
   width: 100%;
   height: 90vh;
+  color: rgb(71, 71, 71);
 }
 
-.no-orders {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+.eachOrder {
+  background-color: rgba(75, 192, 192, 0.3);
+  border: 2px solid rgba(75, 192, 192, 0.4);
+  width:60%;
+  border-radius: 5px;
 }
 
 .no-orders .icon {
@@ -576,7 +616,7 @@ hr {
 }
 
 .indices-container {
-  flex-basis: 32%;
+  flex-basis: 35%;
   height: 100%;
   padding: 10px 20px;
   border-right: 1px solid rgb(224, 224, 224);
@@ -632,11 +672,11 @@ hr {
 }
 
 .watchlist-container {
-  flex-basis: 32%;
+  flex-basis: 35%;
   height: 100%;
   box-sizing: border-box;
   box-shadow: 0px 0px 4px 1px rgb(236, 235, 235);
-  overflow-y: auto;
+  /* overflow-y: auto; */
   position: relative;
 }
 
@@ -647,6 +687,17 @@ hr {
   position: relative;
 }
 
+.scrollable-list{
+  height: 60%;
+  overflow-y: auto;
+}
+
+.watchlistchart{
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  position: relative;
+}
 .search {
   width: 100%;
   height: 6%;
@@ -732,7 +783,7 @@ hr {
   cursor: pointer;
 }
 
-.tooltip{
+.tooltips{
   display: flex;
   flex-wrap: wrap;
   background-color: #f1f1f1;
@@ -754,7 +805,7 @@ hr {
   border: 0.7px solid #ff5722;
 }
 
-.track{
+.ml-decision{
   background-color: #69d279;
   color: #fff;
   font-weight: 400;
@@ -774,7 +825,7 @@ hr {
 
 .watchlist-number {
   height: 6%;
-  width: 32%;
+  width: 35%;
   box-sizing: border-box;
   position: fixed;
   display: inline-flex;

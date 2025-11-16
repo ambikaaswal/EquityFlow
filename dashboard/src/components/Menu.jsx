@@ -1,9 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useUser } from "../UserContext";
+import axios from "axios";
+
 
 const Menu = () => {
   const [selectedMenu, setSelectedMenu] = useState(0);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+  const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL
+  const {user} = useUser();
 
   let handleMenuClick = (index) => {
     setSelectedMenu(index);
@@ -13,6 +20,14 @@ const Menu = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
   };
 
+  const handleLogout = async()=>{
+  try {
+    await axios.post(`${BACKEND_URL}/logout`, {}, { withCredentials: true });
+    window.location.href = `${FRONTEND_URL}/login`;
+  } catch (err) {
+    console.error("Logout failed:", err);
+  }
+};
   const menuclass = "menu";
   const activeMenuClass = "menu selected";
 
@@ -90,8 +105,17 @@ const Menu = () => {
         </ul>
         <hr />
         <div className="profile" onClick={handleProfileClick}>
-          <div className="avatar">ZU</div>
-          <p className="username">USERID</p>
+          <div className="avatar">
+            {user.username.slice(0,2).toUpperCase()}
+          </div>
+          <p className="username">
+            {user.username}
+          </p>
+          {isProfileDropdownOpen && (
+            <div className="profile-dropdown">
+              <button onClick={handleLogout}>logout</button>
+            </div>
+          )}
         </div>
       </div>
     </div>

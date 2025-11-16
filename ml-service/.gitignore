@@ -1,0 +1,9 @@
+.env
+earlycode
+__pycache__/
+*.py[cod]
+notes.txt
+finalOutput.json
+ModeloutputSimpleStrategy.json
+summarize_models.py
+models/model_summary.csv

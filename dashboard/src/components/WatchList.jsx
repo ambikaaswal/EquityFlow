@@ -1,24 +1,50 @@
 import { Tooltip, Grow } from "@mui/material";
-import { watchlistWithML } from "../data/dataML";
+// import { watchlistWithML } from "../data/dataML";
 import {
   BarChartOutlined,
   KeyboardArrowDown,
   KeyboardArrowUp,
   // MoreHoriz,
 } from "@mui/icons-material";
-import { useContext } from "react";
+import {useState,useEffect, useContext } from "react";
 import GeneralContext from "./GeneralContext";
 import { DoughnutChart } from "./DoughnutChart";
+import axios from "axios";
 
-const labels = watchlistWithML.map((subArray)=>subArray["name"]);
+// const labels = watchlistWithML.map((subArray)=>subArray["name"]);
 
 const WatchList = () => {
+
+  const [stocks, setStocks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
+  const fetchWatchlist = async()=>{
+    try{
+      const res = await axios.get(`${BACKEND_URL}/watchlist/stocks`);
+      setStocks(res.data);
+    }catch(err){
+      console.log("failed to fetch watchlist");
+    }finally{
+      setLoading(false);
+    }
+  };
+
+  useEffect(()=>{
+    fetchWatchlist();
+    const interval = setInterval(fetchWatchlist, 5*60*1000);
+    return ()=> clearInterval(interval);
+  },[]);
+
+  if (loading) return <p className="text-gray-500">Loading watchlist...</p>;
+
+  const labels = stocks.map((stock)=>stock.name);
   const data = {
   labels,
   datasets: [
     {
       label: 'price',
-      data: watchlistWithML.map((stock)=>stock.price),
+      data: stocks.map((stock)=>stock.price),
       backgroundColor: [
         'rgba(255, 99, 132, 0.4)',
         'rgba(54, 162, 235, 0.4)',
@@ -40,7 +66,6 @@ const WatchList = () => {
   ],
 };
 
-
   return (
     <div className="watchlist-container">
       <div className="search-container">
@@ -51,16 +76,20 @@ const WatchList = () => {
           placeholder="Search eg:infy, bse, nifty fut weekly, gold mcx"
           className="search"
         />
-        <span className="counts"> {watchlistWithML.length} / 50</span>
+        <span className="counts"> {stocks.length} / 51</span>
       </div>
-      <ul className="list">
-        {watchlistWithML.map((stock, index) => {
-          return <WatchListItem stock={stock} key={index} />;
-        })}
-      </ul>
+      <div className="scrollable-list">
+        <ul className="list">
+          {stocks.map((stock, index) => {
+            return <WatchListItem stock={stock} key={index} />;
+          })}
+        </ul>
+      </div>
 
       {/* chart */}
-      <DoughnutChart data={data}/>
+      <div className="watchlistchart">
+        <DoughnutChart data={data}/>
+      </div>  
       <br />
     </div>
   );
@@ -95,25 +124,25 @@ const WatchListItem = ({ stock, index }) => {
           <span className="price">&#8377;{stock.price}</span>
         </div>
       </div>
-      {showWatchListActions && <WatchListAction uid={stock.name} />}
+      {showWatchListActions && <WatchListAction stock={stock} />}
     </li>
   );
 };
 
 //local component:
-const WatchListAction = ({ uid }) => {
+const WatchListAction = ({ stock }) => {
   const { openBuyWindow } = useContext(GeneralContext);
 
-  const handleSellClick = () => {
-    openBuyWindow(uid); // Reuse modal for selling
-  };
+  // const handleSellClick = () => {
+  //   openBuyWindow(stock.name, "SELL", stock.price); // Reuse code for selling
+  // };
 
-  const handleBuyClick = () => {
-    openBuyWindow(uid);
-  };
+  // const handleBuyClick = () => {
+  //   openBuyWindow(stock.name, "BUY", stock.price);
+  // };
   return (
     <span className="actions">
-      <span className="tooltip">
+      <span className="tooltips">
         <Tooltip
           title="Buy (B)"
           placement="top"
@@ -121,7 +150,7 @@ const WatchListAction = ({ uid }) => {
           slots={{ transition: Grow }}
         >
           {/* <button className="buy" onClick={handleBuyClick}>Buy</button> */}
-          <button className="buy" onClick={() => openBuyWindow(uid, "BUY")}>
+          <button className="buy" onClick={() => openBuyWindow(stock.name, "BUY", stock.price)}>
             Buy
           </button>
         </Tooltip>
@@ -132,22 +161,22 @@ const WatchListAction = ({ uid }) => {
           slots={{ transition: Grow }}
         >
           {/* <button className="sell" onClick={handleSellClick}>Sell</button> */}
-          <button className="sell" onClick={() => openBuyWindow(uid, "SELL")}>
+          <button className="sell" onClick={() => openBuyWindow(stock.name, "SELL", stock.price)}>
             Sell
           </button>
         </Tooltip>
-        <Tooltip
-          title="Track (T)"
+        {/* <Tooltip
+          title="ML recommendation"
           placement="top"
           arrow
           slots={{ transition: Grow }}
         >
-          <button className="track">
-            Track
+          <button className="ml-decision">
+            ml
           </button>
         </Tooltip>
         <Tooltip
-          title="Analytics (A)"
+          title="ML analytics(A)"
           placement="top"
           arrow
           slots={{ transition: Grow }}
@@ -155,7 +184,7 @@ const WatchListAction = ({ uid }) => {
           <button className="action">
             <BarChartOutlined className="icon" />
           </button>
-        </Tooltip>
+        </Tooltip> */}
         {/* <Tooltip
       title="More (M)"
       placement='top'

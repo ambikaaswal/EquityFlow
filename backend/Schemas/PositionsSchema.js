@@ -1,6 +1,8 @@
-const {Schema} = require("mongoose");
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
 const PositionsSchema = new Schema({
+    user: {type: Schema.Types.ObjectId, ref:"User", required: false},
     product: { type: String, required: true },
     name: { type: String, required: true },
     quantity: { type: Number, required: true },
@@ -12,22 +14,12 @@ const PositionsSchema = new Schema({
 
     // ML fields populated
     isAutomated: Boolean, // This was an AI trade
-    exitStrategy: String,
-    stopLoss: Number,
-    targetPrice: Number,
-    mlTriggered: Boolean,
-    confidence: { type: Number, min: 0, max: 1, default: null },
+    // exitStrategy: String,
+    // stopLoss: Number,
+    // targetPrice: Number,
+    // mlTriggered: Boolean,
+    // confidence: { type: Number, min: 0, max: 1, default: null },
 
-    openedAt: { type: Date, default: Date.now },
-    lastUpdated: { type: Date, default: Date.now },
-    // openedAt: When position was created
-    // lastUpdated: Track price updates
-
-    // user: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Users",
-    //     required: true,
-    // },
-});
+}, {timestamps: true});
 
 module.exports = {PositionsSchema}

@@ -14,20 +14,25 @@ export const GeneralContextProvider = (props) => {
   const [isBuyWindowOpen, setIsBuyWindowOpen] = useState(false);
   const [selectedStockUID, setSelectedStockUID] = useState("");
   const [allHoldings, setAllHoldings] = useState([]);
+  const [selectedStockPrice, setSelectedStockPrice] = useState(0.0);
 
+
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+  
   const refreshHoldings = async () => {
-    const res = await axios.get("http://localhost:8000/allHoldings");
-    setAllHoldings(res.data);
+    const res = await axios.get(`${BACKEND_URL}/allHoldings`, {withCredentials:true});
+    setAllHoldings(res.data.allHoldings);
     return res.data;
   };
 
   const[orderMode, setOrderMode] = useState("BUY");
 
 
-  const handleOpenBuyWindow = (uid, mode="BUY") => {
+  const handleOpenBuyWindow = (uid, mode="BUY", price=0.0) => {
     setIsBuyWindowOpen(true);
     setSelectedStockUID(uid);
     setOrderMode(mode);
+    setSelectedStockPrice(price);
   };
 
   const handleCloseBuyWindow = () => {
@@ -45,7 +50,7 @@ export const GeneralContextProvider = (props) => {
       }}
     >
       {props.children}
-      {isBuyWindowOpen && <BuyWindow uid={selectedStockUID} mode = {orderMode}/>}
+      {isBuyWindowOpen && <BuyWindow uid={selectedStockUID} mode = {orderMode} price={selectedStockPrice}/>}
     </GeneralContext.Provider>
   );
 };

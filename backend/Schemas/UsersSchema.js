@@ -1,4 +1,5 @@
-const {Schema} = require('mongoose');
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
 const bcrypt = require("bcryptjs");
 
 const UsersSchema = new Schema({
@@ -12,7 +13,7 @@ const UsersSchema = new Schema({
     required: [true, "Your username is required"],
   },
   mobile:{
-    type: Number,
+    type: String,
     required: [true, "Your mobile number is required"],
     unique: true,
   },
@@ -22,56 +23,30 @@ const UsersSchema = new Schema({
   },
   createdAt: {
     type: Date,
-    default: new Date(),
+    default: Date.now,
   },
 
-//   holdings: [
-//     {
-//       type: mongoose.Schema.Types.ObjectId,
-//       ref: "Holdings",
-//     },
-//   ],
-//   orders: [
-//     {
-//       type: mongoose.Schema.Types.ObjectId,
-//       ref: "Orders",
-//     },
-//   ],
-//   watchlist: [
-//     {
-//       symbol: String,
-//       addedAt: {
-//         type: Date,
-//         default: Date.now,
-//       },
-//     },
-//   ],
-//   positions: [
-//   {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: "Positions",
-//   },
-//   ],
-
-
-//   // whether auto-trading is enabled
-//   autoTradingEnabled: {
-//     type: Boolean,
-//     default: false,
-//   },
-
- // veto setting: auto/manual/hybrid
-//   vetoMode: {
-//     type: String,
-//     enum: ["AUTO", "HYBRID", "MANUAL"],
-//     default: "HYBRID",
-//   },
-
-  // Performance & Analytics
-  // -------------------
+  holdings: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Holdings",
+    },
+  ],
+  orders: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Orders",
+    },
+  ],
+  positions: [
+  {
+    type: Schema.Types.ObjectId,
+    ref: "Positions",
+  },
+  ],
   totalInvested: {
-    type: Number,
-    default: 0,
+  type: Number,
+  default: 0,
   },
   totalCurrentValue: {
     type: Number,
@@ -81,9 +56,34 @@ const UsersSchema = new Schema({
     type: Number,
     default: 0,
   },
+
+//   // whether auto-trading is enabled
+  autoTradingEnabled: {
+    type: Boolean,
+    default: false,
+  },
+
+  autoTradeLimitPercent: { type: Number, default: 0 },
+  autoTradeBalanceUsed: { type: Number, default: 0 },
+
+  balance: {
+  type: Number,
+  default: 10000 // or any starting capital
+},
+  autoTradeFund: {
+    type: Number,
+    default: 0, // Will be set when enabling auto-trade
+},
+
+  initialBalance: {
+    type: Number,
+    default: 10000
+  }
 });
 
 UsersSchema.pre("save", async function () {
-  this.password = await bcrypt.hash(this.password, 12);
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 12);
+  }
 });
 module.exports = {UsersSchema};

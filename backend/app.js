@@ -1,17 +1,20 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 
+const axios = require("axios");
+ 
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
 
-const AuthRoute = require("./Routes/AuthRoute");
-const Stocks = require("./Routes/Stocks");
+const requireAuth = require("./Middlewares/AuthMiddleware")
+
+// useless for now. 
+// const Stocks = require("./Routes/Stocks");
 
 const PORT = process.env.PORT || 8000;
 const DB_URL = process.env.EQUITYFLOW_DB_URL;
-
 
 app.use(
   cors({
@@ -29,330 +32,167 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// function main(){
-//     mongoose.connect(DB_URL);
-// }
-// main()
-// .then(()=>{
-//     console.log("connected to db");
-// }).catch(err=>{
-//     console.log(err);
-// });
+const {WatchlistModel} = require("./models/WatchlistModel");
 
 const {HoldingsModel} = require("./models/HoldingsModel");
 
-//sending data (holdings collection) added to atlas db:
-// app.get("/addHoldings",async(req,res)=>{
-//     let tempHoldings = [
-//   {
-//     name: "BHARTIARTL",
-//     quantity: 2,
-//     avg_price: 538.05,
-//     price: 541.15,
-//     net: 6.2,
-//     day: 32.4,
-//     isLoss: false,
+const {PositionsModel} = require("./models/PositionsModel");
 
-//     mlSuggestion: null,
-//     riskScore: null,
-//     performancePrediction: null,
-//     autoRebalance: false,
-//   },
-//   {
-//     name: "HDFCBANK",
-//     quantity: 2,
-//     avg_price: 1383.4,
-//     price: 1522.35,
-//     net: 277.9,
-//     day: 3.05,
-//     isLoss: false,
+const { UsersModel } = require("./models/UsersModel");
 
-//     mlSuggestion: null,
-//     riskScore: null,
-//     performancePrediction: null,
-//     autoRebalance: false,
-//   },
-//   {
-//     name: "HINDUNILVR",
-//     quantity: 1,
-//     avg_price: 2335.85,
-//     price: 2417.4,
-//     net: 81.55,
-//     day: 5.08,
-//     isLoss: false,
+const {OrdersModel} = require("./models/OrdersModel");
 
-//     mlSuggestion: null,
-//     riskScore: null,
-//     performancePrediction: null,
-//     autoRebalance: false,
-//   },
-//   {
-//     name: "INFY",
-//     quantity: 1,
-//     avg_price: 1350.5,
-//     price: 1555.45,
-//     net: 204.95,
-//     day: -25.2,
-//     isLoss: true,
+// 🔁 Run once immediately, intial sync for watchlist and holdings
+//update/sync watchlist live from NSE:
+const {updateWatchlist} = require("./util/updateWatchlist");
+const { syncHoldingsWithLivePrices } = require("./util/syncHoldings");
+(async () => {
+  try {
+    console.log("🚀 Initial holdings sync...");
+    await updateWatchlist();
+    await syncHoldingsWithLivePrices();
+  } catch (err) {
+    console.error("Initial sync failed:", err.message);
+  }
+})();
 
-//     mlSuggestion: null,
-//     riskScore: null,
-//     performancePrediction: null,
-//     autoRebalance: false,
-//   },
-//   {
-//     name: "ITC",
-//     quantity: 5,
-//     avg_price: 202.0,
-//     price: 207.9,
-//     net: 29.5,
-//     day: 8.32,
-//     isLoss: false,
-
-//     mlSuggestion: null,
-//     riskScore: null,
-//     performancePrediction: null,
-//     autoRebalance: false,
-//   },
-//   {
-//     name: "KPITTECH",
-//     quantity: 5,
-//     avg_price: 250.3,
-//     price: 266.45,
-//     net: 80.75,
-//     day: 44.36,
-//     isLoss: false,
-
-//     mlSuggestion: null,
-//     riskScore: null,
-//     performancePrediction: null,
-//     autoRebalance: false,
-//   },
-//   {
-//     name: "M&M",
-//     quantity: 2,
-//     avg_price: 809.9,
-//     price: 779.8,
-//     net: -60.2,
-//     day: -0.16,
-//     isLoss: true,
-
-//     mlSuggestion: null,
-//     riskScore: null,
-//     performancePrediction: null,
-//     autoRebalance: false,
-//   },
-//   {
-//     name: "RELIANCE",
-//     quantity: 1,
-//     avg_price: 2193.7,
-//     price: 2112.4,
-//     net: -81.3,
-//     day: 30.42,
-//     isLoss: false,
-
-//     mlSuggestion: null,
-//     riskScore: null,
-//     performancePrediction: null,
-//     autoRebalance: false,
-//   },
-//   {
-//     name: "SBIN",
-//     quantity: 4,
-//     avg_price: 324.35,
-//     price: 430.2,
-//     net: 423.4,
-//     day: -5.86,
-//     isLoss: true,
-
-//     mlSuggestion: null,
-//     riskScore: null,
-//     performancePrediction: null,
-//     autoRebalance: false,
-//   },
-//   {
-//     name: "SGBMAY29",
-//     quantity: 2,
-//     avg_price: 4727.0,
-//     price: 4719.0,
-//     net: -16.0,
-//     day: 14.22,
-//     isLoss: false,
-
-//     mlSuggestion: null,
-//     riskScore: null,
-//     performancePrediction: null,
-//     autoRebalance: false,
-//   },
-//   {
-//     name: "TATAPOWER",
-//     quantity: 5,
-//     avg_price: 104.2,
-//     price: 124.15,
-//     net: 99.75,
-//     day: -1.49,
-//     isLoss: true,
-
-//     mlSuggestion: null,
-//     riskScore: null,
-//     performancePrediction: null,
-//     autoRebalance: false,
-//   },
-//   {
-//     name: "TCS",
-//     quantity: 1,
-//     avg_price: 3041.7,
-//     price: 3194.8,
-//     net: 153.1,
-//     day: -8.04,
-//     isLoss: true,
-
-//     mlSuggestion: null,
-//     riskScore: null,
-//     performancePrediction: null,
-//     autoRebalance: false,
-//   },
-//   {
-//     name: "WIPRO",
-//     quantity: 4,
-//     avg_price: 489.3,
-//     price: 577.75,
-//     net: 353.8,
-//     day: 7.4,
-//     isLoss: false,
-
-//     mlSuggestion: null,
-//     riskScore: null,
-//     performancePrediction: null,
-//     autoRebalance: false,
-//   },
-// ];
-//     tempHoldings.forEach((item)=>{
-//         let newHolding = new HoldingsModel({
-//             name: item.name,
-//             quantity: item.quantity,
-//             avg_price: item.avg_price,
-//             price: item.price,
-//             net: item.net,
-//             day: item.day,
-//             isLoss: item.isLoss,
-
-//             mlSuggestion: item.mlSuggestion,
-//             riskScore: item.riskScore,
-//             performancePrediction: item.performancePrediction,
-//             confidence: item.confidence,
-//             autoRebalance: item.autoRebalance,
-//             lastMLUpdate: item.lastMLUpdate,
-//             mlVersion: item.mlVersion
-//         });
-//         newHolding.save();
-//     });
-//     res.send("done!");
-// });
-
-const { PositionsModel } = require("./models/PositionsModel");
-
-//sending data (positions collection) added to atlas db:
-// app.get("/addPositions", async (req, res) => {
-//   let tempPositions = [
-//     {
-//       product: "CNC",
-//       name: "EVEREADY",
-//       quantity: 2,
-//       avg_price: 316.27,
-//       price: 308.65,
-//       net: -7.84,
-//       day: -7.84,
-//       isLoss: true,
-
-//       // ML fields populated
-//       isAutomated: true, // This was an AI trade
-//       exitStrategy: "Stop loss at 300 or target at 340",
-//       stopLoss: 300.0,
-//       targetPrice: 340.0,
-//       mlTriggered: true,
-//     },
-//     {
-//       product: "CNC",
-//       name: "JUBLFOOD",
-//       quantity: 1,
-//       avg_price: 3124.75,
-//       price: 3082.65,
-//       net: 10.04,
-//       day: -1.35,
-//       isLoss: true,
-
-//       // ML fields populated
-//       isAutomated: true, // This was an AI trade
-//       exitStrategy: "idk",
-//       stopLoss: 3000.0,
-//       targetPrice: 3400.0,
-//       mlTriggered: true,
-//     },
-//   ];
-
-//   tempPositions.forEach((item) => {
-//     let newPosition = new PositionsModel({
-//       product: item.product,
-//       name: item.name,
-//       quantity: item.quantity,
-//       avg_price: item.avg_price,
-//       price: item.price,
-//       net: item.net,
-//       day: item.day,
-//       isLoss: item.isLoss,
-
-//       // ML fields populated
-//       isAutomated: item.isAutomated, // This was an AI trade
-//       exitStrategy: item.exitStrategy,
-//       stopLoss: item.stopLoss,
-//       targetPrice: item.targetPrice,
-//       mlTriggered: item.mlTriggered,
-//       confidence: item.confidence,
-//       openedAt: item.openedAt,
-//       lastUpdated: item.lastUpdated,
-//     });
-//     newPosition.save();
-//   });
-//   res.send("done! positions");
-// });
-
-app.get("/allHoldings",async(req,res)=>{
-    let allHoldings = await HoldingsModel.find({});
-    res.json(allHoldings);
+// scheduled holdings update:
+const cron = require("node-cron");
+cron.schedule("*/5 * * * *", async () => {
+  try {
+    console.log("⏱️ Running holdings sync...");
+    await updateWatchlist();
+    await syncHoldingsWithLivePrices();
+  } catch (err) {
+    console.error("Cron job failed:", err.message);
+  }
 });
 
-app.get("/allPositions",async(req,res)=>{
-    let allPositions = await PositionsModel.find({});
-    res.json(allPositions);
+
+//manual trigger:
+// app.post("/mlservice/autoTrade/run", async (req, res) => {
+//   const runAutoTrade = require("./util/runAutoTrade");
+//   await runAutoTrade();
+//   res.json({ message: "Auto trade executed successfully" });
+// });
+
+
+const getUserPayload = (user)=>({
+  id: user._id,
+  name: user.username,
+  balance: user.balance,
+  totalCurrentValue: user.totalCurrentValue,
+  totalInvested: user.totalInvested,
+  totalPnL: user.totalPnL,
+  initialBalance: user.initialBalance,
+  autoTradingEnabled: user.autoTradingEnabled,
+});
+
+app.get("/user/data", requireAuth, async(req,res)=>{
+  res.json({success:true,
+  user:getUserPayload(req.user)});
+});
+
+app.get("/allHoldings", requireAuth, async(req,res)=>{
+    let allHoldings = await HoldingsModel.find({ user: req.user._id });
+    res.json({ success: true, allHoldings });
+});
+
+app.get("/allPositions", requireAuth, async(req,res)=>{
+    let allPositions = await PositionsModel.find({user: req.user._id});
+    res.json({success:true, allPositions});
+});
+
+app.get("/allOrders", requireAuth, async(req,res)=>{
+  let allOrders = await OrdersModel.find({user:req.user._id});
+  res.json({success:true, allOrders});
+});
+
+//get user for dashboard api
+const jwt = require("jsonwebtoken");
+app.get("/getuser", requireAuth, async(req,res)=>{
+  // const token = req.cookies.token;
+  // if(!token) return res.status(401).json({message:"unauthorized access"});
+  // try{
+  //   const decoded = jwt.verify(token, process.env.TOKEN_KEY);
+  //   const user = await UsersModel.findById(decoded.id).select("-password");
+  //   res.json({sucess:true, user});
+  // }catch(err){
+  //   res.status(401).json({message:"Invalid token"});
+  // }
+  res.json({ success: true, user: req.user });
+});
+
+
+app.get("/watchlist/stocks", async(req, res)=>{
+    const watchlist = await WatchlistModel.find({}).sort({percent:-1}).limit(14);
+    // const watchlist = await WatchlistModel.find({}).sort({percent:-1});
+    res.json(watchlist);
+});
+
+
+//balance allocation:
+app.post("/allocateBalance", requireAuth, async (req, res) => {
+  const { amount } = req.body;
+  const userId = req.user._id;
+
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ message: "Invalid amount" });
+  }
+
+  const user = await UsersModel.findByIdAndUpdate(
+    userId,
+    { $inc: { balance: amount } },
+    { new: true }
+  );
+
+  res.json({ message: "Balance updated", balance: user.balance });
 });
 
 //to get new order:
-const {OrdersModel}  = require('./models/OrdersModel');
-app.post('/newOrder', async(req,res)=>{
+app.post('/newOrder', requireAuth, async(req,res)=>{
+  const {name, quantity, price, action} = req.body;
+  const userId = req.user._id;
+
     let newOrder = new OrdersModel({
-        name: req.body.name,
-        quantity: req.body.quantity,
-        price: req.body.price,
-        action: req.body.action
+        name: name,
+        quantity: quantity,
+        price: price,
+        action: action,
+        user:userId
     });
     // console.log(newOrder);
     await newOrder.save();
-    const {name, quantity, price, action} = req.body;
+
+    //Push to user's orders array
+    await UsersModel.findByIdAndUpdate(userId, {
+      $push: { orders: newOrder._id }
+    });
+
     //find the holding
-    const existingHolding = await HoldingsModel.findOne({name});
+    const existingHolding = await HoldingsModel.findOne({name, user:userId});
+    //find user
+    const user = await UsersModel.findById(userId);
     if(action === "BUY")
     {
+            const totalCost = quantity * price;
+            if(user.balance< totalCost)
+              return res.status(400).json({success:false, message: "Insufficient Balance"})
+            user.balance-=totalCost;
+            await user.save();
         //if holding already exists
         if(existingHolding)
         {
             const newQuantity = existingHolding.quantity + quantity;
             const newCost = (existingHolding.avg_price * existingHolding.quantity) + (price*quantity);
             const newAvg_price = newCost/newQuantity;
+            const newPnl = (price-newAvg_price)* newQuantity;
 
             existingHolding.quantity = newQuantity;
             existingHolding.avg_price = newAvg_price;
             existingHolding.price = price;
+            existingHolding.pnl = newPnl;
+            existingHolding.isLoss = newPnl <0;
             await existingHolding.save();
         }else
         {
@@ -364,49 +204,191 @@ app.post('/newOrder', async(req,res)=>{
                 price,
                 net:0,
                 day:0,
-                isLoss:false
+                isLoss:false,
+                user:userId,
             });
             await newHolding.save();
+            await UsersModel.findByIdAndUpdate(userId, {
+                $push: { holdings: newHolding._id }
+              });
         }
+        const holdings = await HoldingsModel.find({user:userId});
+        const totalCurrentValue = holdings.reduce((acc, h)=> acc+ h.price * h.quantity, 0);
+        const totalInvested = holdings.reduce((acc,h)=> acc + h.avg_price * h.quantity, 0);
+        const totalPnl = totalCurrentValue-totalInvested;
+        user.totalInvested = totalInvested;
+        user.totalCurrentValue = totalCurrentValue;
+        user.totalPnL = totalPnl;
+        await user.save();
     }
     if(action=="SELL")
     {
+        if (!existingHolding || existingHolding.quantity < quantity) {
+            return res.status(400).json({ success: false, message: "Not enough quantity to sell" });
+          }
+
+        const proceeds = quantity * price;
+        user.balance+=proceeds;
+        // Recalculate totalInvested and totalCurrentValue
+        const holdings = await HoldingsModel.find({ user: userId });
+        const totalCurrentValue = holdings.reduce((acc, h) => acc + h.price * h.quantity, 0);
+        const totalInvested = holdings.reduce((acc, h) => acc + h.avg_price * h.quantity, 0);
+        const totalPnL = totalCurrentValue - totalInvested;
+
+        user.totalInvested = totalInvested;
+        user.totalCurrentValue = totalCurrentValue;
+        user.totalPnL = totalPnL;
+        await user.save();
         if(existingHolding){
             const newQuantity = existingHolding.quantity - quantity;
             if(newQuantity>0)
             {
                 existingHolding.quantity = newQuantity;
                 existingHolding.price = price;
+                const newPnl = (price - existingHolding.avg_price) * newQuantity;
+                existingHolding.pnl = newPnl;
+                existingHolding.isLoss = newPnl < 0;
                 await existingHolding.save();
             }
             else
             {
-                await HoldingsModel.deleteOne({name});
+                await HoldingsModel.deleteOne({name, user:userId});
+                await UsersModel.findByIdAndUpdate(userId, {
+                  $pull: { holdings: existingHolding._id }
+                });
             }
         }
     }
     res.send("order saved");
 });
 
+//unused
+// app.get("/api/stocks/most-active",Stocks);
 
-app.get("/api/stocks/most-active",Stocks);
+app.post("/logout", (req, res) => {
+  res.clearCookie("token",{
+    httpOnly:true,
+    secure:true,
+    sameSite: "None",
+  });
+  res.json({ success: true, message: "Logged out" });
+});
 
+
+const AuthRoute = require("./Routes/AuthRoute");
 app.use("/", AuthRoute);
 
-// to handle invalid requests:
-// app.use("/",async(req,res)=>{
-//     res.send("bad request");
+
+const MLpredictRoute = require("./Routes/MLpredictRoute");
+app.use("/mlservice",MLpredictRoute);
+
+const updateStocks = require("./util/updateStocks")
+const runAutoTrade = require("./util/runAutoTrade");
+
+
+//run every hour:
+// cron.schedule("0 * * * *", async () => {
+//   try {
+//     console.log("⏰ Running hourly auto trade...");
+//     await runAutoTrade();
+//   } catch (err) {
+//     console.error("❌ Auto trade cron failed:", err.message);
+//   }
 // });
 
-// app.listen(PORT, () => {
-//   console.log("app is listening on port",PORT);
-//   mongoose.connect(DB_URL)
-//   .then(()=> console.log("connected to db") )
-//   .catch((err)=>{
-//     console.log("Failed to connect to database:",err);
-//     process.exit(1);
-//   });
+// app.post('/autotrade', requireAuth, async(req,res)=>{
+//   const userId = req.user._id;
+//   const {enabled, limitPercent} = req.body;
+//   if( enabled && (limitPercent < 1 || limitPercent > 30)){
+//     return res.status(400).json({message: "limit must be  1 and 30"})
+//   }
+//   try{
+//     const updatedUser = await UsersModel.findByIdAndUpdate(
+//       userId,
+//       {
+//         autoTradingEnabled: enabled,
+//         autoTradeLimitPercent: enabled ? limitPercent: 0,
+//       },
+//       {new: true}
+//     );
+
+//    if (enabled) {
+//       console.log("⚙️ Auto trade enabled — fetching latest stock predictions...");
+//       // await updateStocks(); 
+//       await runAutoTrade();
+//     }
+    
+//     res.json({
+//       success: true,
+//       message: enabled
+//       ? `Auto trade enabled (${limitPercent}% balance)`
+//       : "Auto trade disabled",
+//       user: updatedUser,
+//     });
+//   }catch(err){
+//     res.status(500).json({message: "failed to update auto trade status"});
+//   }
 // });
+
+app.post('/autotrade', requireAuth, async(req,res) => {
+  const userId = req.user._id;
+  const { enabled, limitPercent } = req.body;
+
+  if (enabled && (limitPercent < 1 || limitPercent > 30)) {
+    return res.status(400).json({ message: "limit must be between 1 and 30" });
+  }
+
+  try {
+    // If disabling auto-trade, move remaining autoTradeFund to balance
+    if (!enabled && req.user.autoTradeFund && req.user.autoTradeFund > 0) {
+      req.user.balance += req.user.autoTradeFund;
+      console.log(`💸 AutoTradeFund of ₹${req.user.autoTradeFund} moved to balance for ${req.user.username}`);
+      req.user.autoTradeFund = 0;
+    }
+
+    // Update auto-trade settings
+    const updatedUser = await UsersModel.findByIdAndUpdate(
+      userId,
+      {
+        autoTradingEnabled: enabled,
+        autoTradeLimitPercent: enabled ? limitPercent : 0,
+        balance: req.user.balance,
+        autoTradeFund: req.user.autoTradeFund,
+      },
+      { new: true }
+    );
+
+    if (enabled) {
+      console.log("⚙️ Auto trade enabled — fetching latest stock predictions...");
+      await runAutoTrade();
+    }
+
+    res.json({
+      success: true,
+      message: enabled
+        ? `Auto trade enabled (${limitPercent}% of balance)`
+        : "Auto trade disabled",
+      user: updatedUser,
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: "failed to update auto trade status" });
+  }
+});
+
+
+//update stocks:
+app.post("/update-stocks", async (req, res) => {
+  try {
+    console.log("🌀 Manual updateStocks triggered...");
+    await updateStocks();
+    res.json({ success: true, message: "Stocks updated successfully" });
+  } catch (err) {
+    console.error("❌ updateStocks failed:", err.message);
+    res.status(500).json({ success: false, message: "Failed to update stocks", error: err.message });
+  }
+});
+
 
 mongoose
   .connect(DB_URL)

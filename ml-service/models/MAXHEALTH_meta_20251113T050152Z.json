@@ -1,0 +1,32 @@
+{
+  "symbol": "MAXHEALTH.NS",
+  "trained_at": "20251113T050152Z",
+  "features": [
+    "Close",
+    "pct_change",
+    "vol_pct_change",
+    "sma_5",
+    "sma_10",
+    "sma_20",
+    "sma_50",
+    "rsi_14",
+    "macd",
+    "macd_diff",
+    "macd_signal",
+    "bb_high",
+    "bb_low",
+    "bb_width",
+    "atr",
+    "momentum_5",
+    "momentum_10",
+    "volume_ratio",
+    "close_position"
+  ],
+  "accuracy": 0.4859550561797753,
+  "balanced_accuracy": 0.4859550561797753,
+  "model_type": "RandomForest",
+  "prediction_type": "binary_daily",
+  "target": "next_day_direction",
+  "model_file": "MAXHEALTH_model_20251113T050152Z.pkl",
+  "scaler_file": "MAXHEALTH_scaler_20251113T050152Z.pkl"
+}

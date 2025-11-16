@@ -1,0 +1,32 @@
+{
+  "symbol": "HINDUNILVR.NS",
+  "trained_at": "20251113T050137Z",
+  "features": [
+    "Close",
+    "pct_change",
+    "vol_pct_change",
+    "sma_5",
+    "sma_10",
+    "sma_20",
+    "sma_50",
+    "rsi_14",
+    "macd",
+    "macd_diff",
+    "macd_signal",
+    "bb_high",
+    "bb_low",
+    "bb_width",
+    "atr",
+    "momentum_5",
+    "momentum_10",
+    "volume_ratio",
+    "close_position"
+  ],
+  "accuracy": 0.5,
+  "balanced_accuracy": 0.4947092453962538,
+  "model_type": "RandomForest",
+  "prediction_type": "binary_daily",
+  "target": "next_day_direction",
+  "model_file": "HINDUNILVR_model_20251113T050137Z.pkl",
+  "scaler_file": "HINDUNILVR_scaler_20251113T050137Z.pkl"
+}

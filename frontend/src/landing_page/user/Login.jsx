@@ -1,15 +1,19 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+// import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import TextField from "@mui/material/TextField";
 const Login = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [inputValue, setInputValue] = useState({
     email: "",
     password: "",
     mobile:"",
   });
+
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+  const DASHBOARD_URL = import.meta.env.VITE_DASHBOARD_URL;
+
   const { email, password, mobile } = inputValue;
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -32,7 +36,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const { data } = await axios.post(
-        "http://localhost:8000/login",
+        `${BACKEND_URL}/login`,
         {
           ...inputValue,
         },
@@ -43,7 +47,8 @@ const Login = () => {
       if (success) {
         handleSuccess(message);
         setTimeout(() => {
-          navigate("/");
+          // navigate("/");
+          window.open(`${DASHBOARD_URL}`, "_blank");
         }, 1000);
       } else {
         handleError(message);
@@ -121,39 +126,6 @@ const Login = () => {
       </div>
     );
 
-
-  // return (
-  //   <div className="form_container">
-  //     <h2>Login Account</h2>
-  //     <form onSubmit={handleSubmit}>
-  //       <div>
-  //         <label htmlFor="email">Email</label>
-  //         <input
-  //           type="email"
-  //           name="email"
-  //           value={email}
-  //           placeholder="Enter your email"
-  //           onChange={handleOnChange}
-  //         />
-  //       </div>
-  //       <div>
-  //         <label htmlFor="password">Password</label>
-  //         <input
-  //           type="password"
-  //           name="password"
-  //           value={password}
-  //           placeholder="Enter your password"
-  //           onChange={handleOnChange}
-  //         />
-  //       </div>
-  //       <button type="submit">Submit</button>
-  //       <span>
-  //         Already have an account? <Link to={"/signup"}>Signup</Link>
-  //       </span>
-  //     </form>
-  //     <ToastContainer />
-  //   </div>
-  // );
 };
 
 export default Login;

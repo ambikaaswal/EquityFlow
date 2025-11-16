@@ -1,0 +1,32 @@
+{
+  "symbol": "AXISBANK.NS",
+  "trained_at": "20251113T045926Z",
+  "features": [
+    "Close",
+    "pct_change",
+    "vol_pct_change",
+    "sma_5",
+    "sma_10",
+    "sma_20",
+    "sma_50",
+    "rsi_14",
+    "macd",
+    "macd_diff",
+    "macd_signal",
+    "bb_high",
+    "bb_low",
+    "bb_width",
+    "atr",
+    "momentum_5",
+    "momentum_10",
+    "volume_ratio",
+    "close_position"
+  ],
+  "accuracy": 0.547752808988764,
+  "balanced_accuracy": 0.5526398888467854,
+  "model_type": "RandomForest",
+  "prediction_type": "binary_daily",
+  "target": "next_day_direction",
+  "model_file": "AXISBANK_model_20251113T045926Z.pkl",
+  "scaler_file": "AXISBANK_scaler_20251113T045926Z.pkl"
+}

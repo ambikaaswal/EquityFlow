@@ -2,7 +2,7 @@ const { UsersModel } = require("../models/UsersModel");
 const { createSecretToken } = require("../util/SecretToken");
 const bcrypt = require("bcryptjs");
 
-module.exports.Signup = async (req, res, next) => {
+module.exports.Signup = async (req, res) => {
   // console.log(req.body);
   try {
     const { email, mobile, password, username, createdAt } = req.body;
@@ -48,7 +48,7 @@ module.exports.Signup = async (req, res, next) => {
   }
 };
 
-module.exports.Login = async (req, res, next) => {
+module.exports.Login = async (req, res) => {
   try {
     const { email, mobile, password } = req.body;
     if (!email || !password || !mobile) {
@@ -78,12 +78,19 @@ module.exports.Login = async (req, res, next) => {
     const token = createSecretToken(user._id);
     res.cookie("token", token, {
       withCredentials: true,
-      httpOnly: true,//earlier false
+      httpOnly: false,//earlier true
     });
     res
       .status(201)
-      .json({ message: "User logged in successfully", success: true });
-    // next();
+      .json({
+        message: "User logged in successfully",
+        success: true,
+        user:{
+          id: user._id,
+          username: user.username,
+          email: user.email
+        } });
+    // next();//there is no next middleware
   } catch (error) {
     console.error(error);
   }
