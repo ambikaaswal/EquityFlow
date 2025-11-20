@@ -12,50 +12,95 @@ from ta.trend import SMAIndicator, MACD
 from ta.momentum import RSIIndicator
 from ta.volatility import BollingerBands, AverageTrueRange
 import argparse
+import datetime
+import requests
 
 MODEL_DIR = "models"
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 
-# Add at the top
-from nsepython import nsefetch
+import yfinance as yf
+import pandas as pd
+import datetime
 
 def fetch_nse_data(symbol, years=5):
     """
-    Fetch historical OHLCV data from NSE for the given symbol.
-    Returns a DataFrame similar to yfinance format.
+    Fetch historical data using yfinance
+    Symbol should be in .NS format (e.g., RELIANCE.NS)
     """
-    import pandas as pd
-    import datetime
-
     end = datetime.datetime.today()
     start = end - datetime.timedelta(days=years*365)
-
-    url = f"https://www.nseindia.com/api/quote-equity?symbol={symbol.replace('.NS','')}"
     
     try:
-        data = nsefetch(url)  # returns dict with historical data
-        # The API may need 'historical' endpoint:
-        hist_url = f"https://www.nseindia.com/api/historical/cm/equity?symbol={symbol.replace('.NS','')}&series=[\"EQ\"]&from={start.strftime('%d-%m-%Y')}&to={end.strftime('%d-%m-%Y')}"
-        hist = nsefetch(hist_url)
-        df = pd.DataFrame(hist['data'])
-        df.rename(columns={
-            'CH_DATE': 'Date',
-            'CH_OPENING_PRICE': 'Open',
-            'CH_CLOSING_PRICE': 'Close',
-            'CH_HIGH_PRICE': 'High',
-            'CH_LOW_PRICE': 'Low',
-            'CH_TOTTRDQTY': 'Volume'
-        }, inplace=True)
-        df['Date'] = pd.to_datetime(df['Date'], format='%d-%b-%Y')
-        df.set_index('Date', inplace=True)
-        df = df[['Open','High','Low','Close','Volume']].sort_index()
+        print(f"📥 Fetching data for {symbol}...")
+        df = yf.download(symbol, start=start, end=end, progress=False, auto_adjust=False)
+        
+        if df is None or len(df) < 100:
+            print(f"⚠️ Insufficient data for {symbol}")
+            return None
+        
+        # Flatten multi-level columns if present
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = [col[0] if isinstance(col, tuple) else col for col in df.columns]
+        
+        # Ensure we have required columns
+        required_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
+        if not all(col in df.columns for col in required_cols):
+            print(f"⚠️ Missing columns for {symbol}")
+            return None
+        
+        df = df[required_cols]
         df = df.apply(pd.to_numeric, errors='coerce')
         df.dropna(inplace=True)
+        
+        print(f"✅ Fetched {len(df)} rows for {symbol}")
         return df
+        
     except Exception as e:
-        print(f"⚠️ Failed to fetch NSE data for {symbol}: {e}")
+        print(f"⚠️ Failed to fetch data for {symbol}: {e}")
         return None
+
+
+# Add at the top
+# from nsepython import nsefetch
+
+# def fetch_nse_data(symbol, years=5):
+#     """
+#     Fetch historical OHLCV data from NSE for the given symbol.
+#     Returns a DataFrame similar to yfinance format.
+#     """
+#     import pandas as pd
+#     import datetime
+
+#     end = datetime.datetime.today()
+#     start = end - datetime.timedelta(days=years*365)
+
+#     url = f"https://www.nseindia.com/api/quote-equity?symbol={symbol.replace('.NS','')}"
+    
+#     try:
+#         data = nsefetch(url)  # returns dict with historical data
+#         # The API may need 'historical' endpoint:
+#         hist_url = f"https://www.nseindia.com/api/historical/cm/equity?symbol={symbol.replace('.NS','')}&series=[\"EQ\"]&from={start.strftime('%d-%m-%Y')}&to={end.strftime('%d-%m-%Y')}"
+#         hist = nsefetch(hist_url)
+#         df = pd.DataFrame(hist['data'])
+#         df.rename(columns={
+#             'CH_DATE': 'Date',
+#             'CH_OPENING_PRICE': 'Open',
+#             'CH_CLOSING_PRICE': 'Close',
+#             'CH_HIGH_PRICE': 'High',
+#             'CH_LOW_PRICE': 'Low',
+#             'CH_TOTTRDQTY': 'Volume'
+#         }, inplace=True)
+#         df['Date'] = pd.to_datetime(df['Date'], format='%d-%b-%Y')
+#         df.set_index('Date', inplace=True)
+#         df = df[['Open','High','Low','Close','Volume']].sort_index()
+#         df = df.apply(pd.to_numeric, errors='coerce')
+#         df.dropna(inplace=True)
+#         return df
+#     except Exception as e:
+#         print(f"⚠️ Failed to fetch NSE data for {symbol}: {e}")
+#         return None
+
 
 
 def cleanup_old_models(symbol_prefix, keep_last=2):
@@ -181,15 +226,15 @@ def train_model(symbol="RELIANCE.NS", years=5):
         df.columns = [col[0] if isinstance(col, tuple) else col for col in df.columns]
 
     # If insufficient, try 2 years
-    if len(df) < 100:
-        print(f"Trying shorter timeframe for {symbol}")
-        start = end - datetime.timedelta(days=2*365)
-        df = yf.download(symbol, start=start, end=end)
+    # if len(df) < 100:
+    #     print(f"Trying shorter timeframe for {symbol}")
+    #     start = end - datetime.timedelta(days=2*365)
+    #     df = yf.download(symbol, start=start, end=end)
 
-    # If still insufficient, skip
-    if len(df) < 100:
-        print(f"⚠️  Skipping {symbol}: Not enough data")
-        return None
+    # # If still insufficient, skip
+    # if len(df) < 100:
+    #     print(f"⚠️  Skipping {symbol}: Not enough data")
+    #     return None
 
     # Engineer features
     df = engineer_features(df)
@@ -324,4 +369,3 @@ if __name__ == "__main__":
         print(f"✅ Training completed for {result['symbol']}")
         print(f"📊 Final Balanced Accuracy: {result['balanced_accuracy']:.1%}")
         print(f"{'='*60}")
-

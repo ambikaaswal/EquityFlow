@@ -1,3 +1,4 @@
+//summary.jsx
 import axios from "axios";
 import { useContext, useEffect } from "react";
 import { useState } from "react";
@@ -90,24 +91,6 @@ const Summary = () => {
     }
   };
 
-  //enables auto trading logic
-  // const handleAutoTrade = async(e)=>{
-  //   e.preventDefault();
-  //   try{
-  //     const res = await axios.post(`${BACKEND_URL}/autotrade`,
-  //       { enabled: true,
-  //         limitPercent: Number(percentForAutoTrade),
-  //       },
-  //       {withCredentials:true}
-  //     );
-  //     toast.success(res.data.message || "Auto trade enabled");
-  //     setAutoTradeEnabled(true);
-  //     setShowAutoTradeForm(false);
-  //   }catch(err){
-  //     toast.error(err.response?.data?.message || "failed to enable Auto trade")
-  //   }    
-  //   console.log("Auto trading");
-  // }
 
   const handleAutoTrade = async (e) => {
   e.preventDefault();

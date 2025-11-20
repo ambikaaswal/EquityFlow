@@ -16,6 +16,8 @@ const requireAuth = require("./Middlewares/AuthMiddleware")
 const PORT = process.env.PORT || 8000;
 const DB_URL = process.env.EQUITYFLOW_DB_URL;
 
+//5173: dashboard react app
+//5174: frontend react app
 app.use(
   cors({
     // origin: ["http://localhost:5173"],
@@ -36,6 +38,7 @@ const {WatchlistModel} = require("./models/WatchlistModel");
 
 const {HoldingsModel} = require("./models/HoldingsModel");
 
+//not used so far
 const {PositionsModel} = require("./models/PositionsModel");
 
 const { UsersModel } = require("./models/UsersModel");
@@ -56,20 +59,20 @@ const { syncHoldingsWithLivePrices } = require("./util/syncHoldings");
   }
 })();
 
-// scheduled holdings update:
-const cron = require("node-cron");
-cron.schedule("*/5 * * * *", async () => {
-  try {
-    console.log("⏱️ Running holdings sync...");
-    await updateWatchlist();
-    await syncHoldingsWithLivePrices();
-  } catch (err) {
-    console.error("Cron job failed:", err.message);
-  }
-});
+// cron job for scheduled holdings and watchlist update:
+// const cron = require("node-cron");
+// cron.schedule("*/5 * * * *", async () => {
+//   try {
+//     console.log("Running holdings sync...");
+//     await updateWatchlist();
+//     await syncHoldingsWithLivePrices();
+//   } catch (err) {
+//     console.error("Cron job failed:", err.message);
+//   }
+// });
 
 
-//manual trigger:
+//manual trigger for autotrade:
 // app.post("/mlservice/autoTrade/run", async (req, res) => {
 //   const runAutoTrade = require("./util/runAutoTrade");
 //   await runAutoTrade();
@@ -77,6 +80,7 @@ cron.schedule("*/5 * * * *", async () => {
 // });
 
 
+//get user info object values deconstructed:
 const getUserPayload = (user)=>({
   id: user._id,
   name: user.username,
@@ -87,6 +91,7 @@ const getUserPayload = (user)=>({
   initialBalance: user.initialBalance,
   autoTradingEnabled: user.autoTradingEnabled,
 });
+
 
 app.get("/user/data", requireAuth, async(req,res)=>{
   res.json({success:true,
@@ -278,7 +283,7 @@ app.post("/logout", (req, res) => {
 const AuthRoute = require("./Routes/AuthRoute");
 app.use("/", AuthRoute);
 
-
+//send predict request to ml service
 const MLpredictRoute = require("./Routes/MLpredictRoute");
 app.use("/mlservice",MLpredictRoute);
 
@@ -287,49 +292,18 @@ const runAutoTrade = require("./util/runAutoTrade");
 
 
 //run every hour:
-// cron.schedule("0 * * * *", async () => {
-//   try {
-//     console.log("⏰ Running hourly auto trade...");
-//     await runAutoTrade();
-//   } catch (err) {
-//     console.error("❌ Auto trade cron failed:", err.message);
-//   }
-// });
+cron.schedule("0 * * * *", async () => {
+  try {
+    console.log("⏰ Running hourly auto trade...");
+    await runAutoTrade();
+  } catch (err) {
+    console.error("❌ Auto trade cron failed:", err.message);
+  }
+});
 
-// app.post('/autotrade', requireAuth, async(req,res)=>{
-//   const userId = req.user._id;
-//   const {enabled, limitPercent} = req.body;
-//   if( enabled && (limitPercent < 1 || limitPercent > 30)){
-//     return res.status(400).json({message: "limit must be  1 and 30"})
-//   }
-//   try{
-//     const updatedUser = await UsersModel.findByIdAndUpdate(
-//       userId,
-//       {
-//         autoTradingEnabled: enabled,
-//         autoTradeLimitPercent: enabled ? limitPercent: 0,
-//       },
-//       {new: true}
-//     );
 
-//    if (enabled) {
-//       console.log("⚙️ Auto trade enabled — fetching latest stock predictions...");
-//       // await updateStocks(); 
-//       await runAutoTrade();
-//     }
-    
-//     res.json({
-//       success: true,
-//       message: enabled
-//       ? `Auto trade enabled (${limitPercent}% balance)`
-//       : "Auto trade disabled",
-//       user: updatedUser,
-//     });
-//   }catch(err){
-//     res.status(500).json({message: "failed to update auto trade status"});
-//   }
-// });
 
+//autotrading route:
 app.post('/autotrade', requireAuth, async(req,res) => {
   const userId = req.user._id;
   const { enabled, limitPercent } = req.body;
@@ -339,27 +313,31 @@ app.post('/autotrade', requireAuth, async(req,res) => {
   }
 
   try {
-    // If disabling auto-trade, move remaining autoTradeFund to balance
-    if (!enabled && req.user.autoTradeFund && req.user.autoTradeFund > 0) {
-      req.user.balance += req.user.autoTradeFund;
-      console.log(`💸 AutoTradeFund of ₹${req.user.autoTradeFund} moved to balance for ${req.user.username}`);
-      req.user.autoTradeFund = 0;
+    const user = await UsersModel.findById(userId);
+    
+    // If disabling auto-trade
+    if (!enabled) {
+      // Move remaining autoTradeFund to balance
+      if (user.autoTradeFund > 0) {
+        user.balance += user.autoTradeFund;
+        console.log(`💸 AutoTradeFund of ₹${user.autoTradeFund} moved to balance`);
+        user.autoTradeFund = 0;
+      }
+      
+      // Mark all auto-traded holdings as manual (optional - or keep them as is)
+      await HoldingsModel.updateMany(
+        { user: userId, isAutoTraded: true },
+        { $set: { isAutoTraded: false } }
+      );
     }
 
-    // Update auto-trade settings
-    const updatedUser = await UsersModel.findByIdAndUpdate(
-      userId,
-      {
-        autoTradingEnabled: enabled,
-        autoTradeLimitPercent: enabled ? limitPercent : 0,
-        balance: req.user.balance,
-        autoTradeFund: req.user.autoTradeFund,
-      },
-      { new: true }
-    );
+    // Update settings
+    user.autoTradingEnabled = enabled;
+    user.autoTradeLimitPercent = enabled ? limitPercent : 0;
+    await user.save();
 
     if (enabled) {
-      console.log("⚙️ Auto trade enabled — fetching latest stock predictions...");
+      console.log("⚙️ Auto trade enabled — running first cycle...");
       await runAutoTrade();
     }
 
@@ -367,17 +345,17 @@ app.post('/autotrade', requireAuth, async(req,res) => {
       success: true,
       message: enabled
         ? `Auto trade enabled (${limitPercent}% of balance)`
-        : "Auto trade disabled",
-      user: updatedUser,
+        : "Auto trade disabled, funds returned to balance",
+      user,
     });
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "failed to update auto trade status" });
   }
 });
 
-
-//update stocks:
+//update stocks model:
 app.post("/update-stocks", async (req, res) => {
   try {
     console.log("🌀 Manual updateStocks triggered...");

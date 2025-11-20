@@ -1,203 +1,3 @@
-// const { UsersModel } = require("../models/UsersModel");
-// const { OrdersModel } = require("../models/OrdersModel");
-// const { HoldingsModel } = require("../models/HoldingsModel");
-// const { StocksModel } = require("../models/StocksModel");
-
-// async function runAutoTrade() {
-//   console.log("🚀 Running Auto trade");
-
-//   const users = await UsersModel.find({ autoTradingEnabled: true });
-//   if (!users.length) {
-//     console.log("⚠️ No auto-trading users found");
-//     return;
-//   }
-
-//   for (const user of users) {
-//     console.log(`\n👤 Processing user: ${user.username}`);
-//     const { _id: userId, autoTradeLimitPercent } = user;
-
-//     // Initialize AutoTradeFund if not set
-//     if (!user.autoTradeFund || user.autoTradeFund <= 0) {
-//       const fund = (user.balance * autoTradeLimitPercent) / 100;
-//       user.autoTradeFund = fund;
-//       user.balance -= fund;
-//       await user.save();
-//       console.log(`💰 Initialized AutoTradeFund: ₹${user.autoTradeFund}`);
-//     }
-
-//     // Fetch auto-traded holdings
-//     let autoHoldings = await HoldingsModel.find({ user: userId, isAutoTraded: true });
-//     let investedAutoBalance = autoHoldings.reduce((sum, h) => sum + h.quantity * h.price, 0);
-//     let remainingAutoBalance = user.autoTradeFund - investedAutoBalance;
-
-//     console.log(`AutoTradeFund: ₹${user.autoTradeFund}, Invested: ₹${investedAutoBalance}, Remaining: ₹${remainingAutoBalance}`);
-
-//     if (remainingAutoBalance <= 0) {
-//       console.log("❌ No remaining auto-trade balance");
-//       continue;
-//     }
-
-//     const stocks = await StocksModel.find({ autoTradeEnabled: true });
-//     if (!stocks.length) {
-//       console.log("⚠️ No eligible stocks found for trading.");
-//       continue;
-//     }
-
-//     console.log(`Eligible stocks for trading: ${stocks.map(s => s.symbol).join(", ")}`);
-
-//     for (const stock of stocks) {
-//       const { symbol, mlRecommendation, confidence, lastPredictedAt, currentPrice } = stock;
-
-//       // Skip outdated predictions
-//       if (Date.now() - new Date(lastPredictedAt) > 24 * 60 * 60 * 1000) {
-//         console.log(`⏰ Skipped ${symbol}: Prediction older than 24h`);
-//         continue;
-//       }
-
-//       if (confidence < 0.60) {
-//         console.log(`⚠️ Skipped ${symbol}: Confidence too low (${confidence})`);
-//         continue;
-//       }
-
-//       const existingHolding = await HoldingsModel.findOne({ user: userId, name: symbol });
-//       const price = currentPrice || 1000;
-
-//       // ===== BUY LOGIC =====
-//       if (mlRecommendation.toUpperCase() === "BUY" && remainingAutoBalance > 0) {
-//         // Allocate 50% of remaining auto fund for this stock, min 1 share
-//         let allocation = Math.min(remainingAutoBalance, user.autoTradeFund * 0.3);
-//         let quantity = Math.max(1, Math.floor(allocation / price));
-//         const totalCost = quantity * price;
-
-//         if (totalCost > remainingAutoBalance) {
-//           quantity = Math.floor(remainingAutoBalance / price);
-//         }
-
-//         if (quantity <= 0) {
-//           console.log(`⚠️ Skipped BUY ${symbol}: Allocation too small`);
-//           continue;
-//         }
-
-//         const finalCost = quantity * price;
-
-//         try {
-//           // Create order
-//           const newOrder = await OrdersModel.create({
-//             user: userId,
-//             name: symbol,
-//             quantity,
-//             price,
-//             action: "BUY",
-//             mlRecommendation,
-//             confidence,
-//             autoTradeEnabled: true,
-//             executed: true,
-//             autoTradeBalanceUsed: finalCost,
-//           });
-
-//           await UsersModel.findByIdAndUpdate(userId, { $push: { orders: newOrder._id } });
-
-//           // Update or create holding
-//           if (existingHolding) {
-//             const newQuantity = existingHolding.quantity + quantity;
-//             const newAvgPrice = ((existingHolding.avg_price * existingHolding.quantity) + finalCost) / newQuantity;
-//             existingHolding.quantity = newQuantity;
-//             existingHolding.avg_price = newAvgPrice;
-//             existingHolding.price = price;
-//             existingHolding.pnl = (price - newAvgPrice) * newQuantity;
-//             existingHolding.isLoss = existingHolding.pnl < 0;
-//             await existingHolding.save();
-//           } else {
-//             const newHolding = await HoldingsModel.create({
-//               user: userId,
-//               name: symbol,
-//               quantity,
-//               avg_price: price,
-//               price,
-//               pnl: 0,
-//               isLoss: false,
-//               autoTradeEnabled: true,
-//             });
-//             await UsersModel.findByIdAndUpdate(userId, { $push: { holdings: newHolding._id } });
-//           }
-
-//           // Update user's autoTradeFund and remaining balance
-//           user.autoTradeFund -= finalCost;
-//           await user.save();
-//           remainingAutoBalance -= finalCost;
-//           investedAutoBalance += finalCost;
-
-//           console.log(`✅ Auto-Buy executed: ${symbol} (${quantity} shares at ₹${price})`);
-//         } catch (err) {
-//           console.log(`❌ Failed to execute BUY for ${symbol}:`, err.message);
-//         }
-//       }
-
-//       // ===== SELL LOGIC =====
-//       if (mlRecommendation.toUpperCase() === "SELL" && existingHolding && existingHolding.isAutoTraded) {
-//         const quantityToSell = existingHolding.quantity;
-//         const sellPrice = price;
-//         const proceeds = quantityToSell * sellPrice;
-
-//         const autoFundPortion = proceeds * 0.5;
-//         const balancePortion = proceeds - autoFundPortion;
-
-//         try {
-//           // Create order
-//           const newOrder = await OrdersModel.create({
-//             user: userId,
-//             name: symbol,
-//             quantity: quantityToSell,
-//             price: sellPrice,
-//             action: "SELL",
-//             mlRecommendation,
-//             autoTradeEnabled: true,
-//             executed: true,
-//           });
-
-//           await UsersModel.findByIdAndUpdate(userId, { $push: { orders: newOrder._id } });
-
-//           // Remove holding
-//           await HoldingsModel.deleteOne({ _id: existingHolding._id });
-//           await UsersModel.findByIdAndUpdate(userId, { $pull: { holdings: existingHolding._id } });
-
-//           // Update user balances
-//           user.balance += balancePortion;
-//           user.autoTradeFund += autoFundPortion;
-//           await user.save();
-
-//           // Update local variables
-//           remainingAutoBalance += quantityToSell * existingHolding.avg_price;
-//           investedAutoBalance -= quantityToSell * existingHolding.avg_price;
-
-//           console.log(`✅ Auto-Sell executed: ${symbol} (${quantityToSell} shares at ₹${sellPrice})`);
-//         } catch (err) {
-//           console.log(`❌ Failed to execute SELL for ${symbol}:`, err.message);
-//         }
-//       }
-//     }
-
-//     // Recalculate totals
-//     try {
-//       const userHoldings = await HoldingsModel.find({ user: userId });
-//       const totalCurrentValue = userHoldings.reduce((acc, h) => acc + h.price * h.quantity, 0);
-//       const totalInvested = userHoldings.reduce((acc, h) => acc + h.avg_price * h.quantity, 0);
-//       const totalPnL = totalCurrentValue - totalInvested;
-
-//       user.totalInvested = totalInvested;
-//       user.totalCurrentValue = totalCurrentValue;
-//       user.totalPnL = totalPnL;
-//       await user.save();
-//     } catch (err) {
-//       console.log("❌ Failed to update user totals:", err.message);
-//     }
-//   }
-
-//   console.log("\n✅ Auto Trade cycle completed.");
-// }
-
-// module.exports = runAutoTrade;
-
 const { UsersModel } = require("../models/UsersModel");
 const { OrdersModel } = require("../models/OrdersModel");
 const { HoldingsModel } = require("../models/HoldingsModel");
@@ -216,24 +16,47 @@ async function runAutoTrade() {
     console.log(`\n👤 Processing user: ${user.username}`);
     const { _id: userId, autoTradeLimitPercent } = user;
 
-    // Initialize AutoTradeFund if not set
-    if (!user.autoTradeFund || user.autoTradeFund <= 0) {
+    // Initialize AutoTradeFund ONLY if it hasn't been set yet (first time enabling)
+    if (user.autoTradeFund === 0 && user.autoTradeLimitPercent > 0) {
+      // IMPORTANT: Clear any orphaned auto-trade holdings before initializing
+      const orphanedHoldings = await HoldingsModel.find({ 
+        user: userId, 
+        isAutoTraded: true 
+      });
+      
+      if (orphanedHoldings.length > 0) {
+        console.log(`⚠️ Found ${orphanedHoldings.length} orphaned auto-trade holdings. Clearing...`);
+        // Mark them as manual holdings instead of deleting
+        await HoldingsModel.updateMany(
+          { user: userId, isAutoTraded: true },
+          { $set: { isAutoTraded: false } }
+        );
+      }
+      
       const fund = (user.balance * autoTradeLimitPercent) / 100;
       user.autoTradeFund = fund;
       user.balance -= fund;
       await user.save();
-      console.log(`💰 Initialized AutoTradeFund: ₹${user.autoTradeFund}`);
+      console.log(`✅ Initialized AutoTradeFund: ₹${user.autoTradeFund}`);
     }
 
-    // Fetch auto-traded holdings
-    let autoHoldings = await HoldingsModel.find({ user: userId, isAutoTraded: true });
-    let investedAutoBalance = autoHoldings.reduce((sum, h) => sum + h.quantity * h.price, 0);
-    let remainingAutoBalance = user.autoTradeFund - investedAutoBalance;
+    // Calculate available auto-trade balance
+    const autoHoldings = await HoldingsModel.find({ user: userId, isAutoTraded: true });
+    
+    // Invested = sum of (avg_price × quantity) for auto-traded holdings
+    const investedAutoBalance = autoHoldings.reduce(
+      (sum, h) => sum + (h.avg_price * h.quantity), 
+      0
+    );
+    
+    const remainingAutoBalance = user.autoTradeFund - investedAutoBalance;
 
-    console.log(`AutoTradeFund: ₹${user.autoTradeFund}, Invested: ₹${investedAutoBalance}, Remaining: ₹${remainingAutoBalance}`);
+    console.log(`💰 AutoTradeFund: ₹${user.autoTradeFund.toFixed(2)}`);
+    console.log(`📊 Invested: ₹${investedAutoBalance.toFixed(2)}`);
+    console.log(`💵 Remaining: ₹${remainingAutoBalance.toFixed(2)}`);
 
     if (remainingAutoBalance <= 0) {
-      console.log("❌ No remaining auto-trade balance");
+      console.log("⚠️ No remaining auto-trade balance");
       continue;
     }
 
@@ -243,35 +66,52 @@ async function runAutoTrade() {
       continue;
     }
 
-    console.log(`Eligible stocks for trading: ${stocks.map(s => s.symbol).join(", ")}`);
+    console.log(`📈 Eligible stocks: ${stocks.map(s => s.symbol).join(", ")}`);
 
     const boughtStocksThisCycle = new Set();
+    let currentRemainingBalance = remainingAutoBalance;
 
     for (const stock of stocks) {
       const { symbol, mlRecommendation, confidence, lastPredictedAt, currentPrice } = stock;
 
-      // Skip outdated predictions
-      if (Date.now() - new Date(lastPredictedAt) > 24 * 60 * 60 * 1000) continue;
-      if (confidence < 0.6) continue;
+      // Skip outdated predictions (older than 24 hours)
+      if (Date.now() - new Date(lastPredictedAt) > 24 * 60 * 60 * 1000) {
+        console.log(`⏰ Skipping ${symbol}: Prediction too old`);
+        continue;
+      }
+      
+      if (confidence < 0.6) {
+        console.log(`📉 Skipping ${symbol}: Low confidence (${confidence})`);
+        continue;
+      }
 
-      const existingHolding = await HoldingsModel.findOne({ user: userId, name: symbol });
+      const existingHolding = await HoldingsModel.findOne({ 
+        user: userId, 
+        name: symbol 
+      });
+      
       const price = currentPrice || 1000;
 
       // ===== BUY LOGIC =====
       if (
         mlRecommendation.toUpperCase() === "BUY" &&
-        remainingAutoBalance > 0 &&
+        currentRemainingBalance > 0 &&
         !boughtStocksThisCycle.has(symbol)
       ) {
-        let allocation = Math.min(remainingAutoBalance, user.autoTradeFund * 0.3);
-        let quantity = Math.max(1, Math.floor(allocation / price));
-
-        if (quantity <= 0) quantity = 1; // Force at least 1 share if allocation too small
+        // Allocate max 30% of total auto-trade fund per stock
+        let maxAllocation = user.autoTradeFund * 0.3;
+        let allocation = Math.min(currentRemainingBalance, maxAllocation);
+        
+        // Calculate quantity - must be at least 1
+        let quantity = Math.floor(allocation / price);
+        
+        // Skip if can't afford even 1 share
+        if (quantity < 1) {
+          console.log(`⚠️ Skipped BUY ${symbol}: Can't afford 1 share (Price: ₹${price}, Available: ₹${currentRemainingBalance.toFixed(2)})`);
+          continue;
+        }
 
         const totalCost = quantity * price;
-        if (totalCost > remainingAutoBalance) quantity = Math.floor(remainingAutoBalance / price);
-
-        const finalCost = quantity * price;
 
         try {
           // Create order
@@ -285,20 +125,26 @@ async function runAutoTrade() {
             confidence,
             autoTradeEnabled: true,
             executed: true,
-            autoTradeBalanceUsed: finalCost,
           });
-          await UsersModel.findByIdAndUpdate(userId, { $push: { orders: newOrder._id } });
+          await UsersModel.findByIdAndUpdate(userId, { 
+            $push: { orders: newOrder._id } 
+          });
 
           // Update or create holding
           if (existingHolding) {
             const newQuantity = existingHolding.quantity + quantity;
-            const newAvgPrice = ((existingHolding.avg_price * existingHolding.quantity) + finalCost) / newQuantity;
+            const newCost = (existingHolding.avg_price * existingHolding.quantity) + totalCost;
+            const newAvgPrice = newCost / newQuantity;
+            
             existingHolding.quantity = newQuantity;
             existingHolding.avg_price = newAvgPrice;
             existingHolding.price = price;
             existingHolding.pnl = (price - newAvgPrice) * newQuantity;
             existingHolding.isLoss = existingHolding.pnl < 0;
+            existingHolding.isAutoTraded = true; // Mark as auto-traded
             await existingHolding.save();
+            
+            console.log(`📊 Updated holding ${symbol}: ${newQuantity} shares @ avg ₹${newAvgPrice.toFixed(2)}`);
           } else {
             const newHolding = await HoldingsModel.create({
               user: userId,
@@ -310,31 +156,38 @@ async function runAutoTrade() {
               isLoss: false,
               isAutoTraded: true,
             });
-            await UsersModel.findByIdAndUpdate(userId, { $push: { holdings: newHolding._id } });
+            await UsersModel.findByIdAndUpdate(userId, { 
+              $push: { holdings: newHolding._id } 
+            });
+            
+            console.log(`✨ Created new holding ${symbol}: ${quantity} shares @ ₹${price}`);
           }
 
-          // Update balances
-          user.autoTradeFund -= finalCost;
-          await user.save();
-          remainingAutoBalance -= finalCost;
-          investedAutoBalance += finalCost;
-
+          // Update tracking
+          currentRemainingBalance -= totalCost;
           boughtStocksThisCycle.add(symbol);
-          console.log(`✅ Auto-Buy executed: ${symbol} (${quantity} shares at ₹${price})`);
+          
+          console.log(`✅ Auto-Buy executed: ${symbol} (${quantity} shares at ₹${price}, Cost: ₹${totalCost.toFixed(2)})`);
         } catch (err) {
           console.log(`❌ Failed to execute BUY for ${symbol}:`, err.message);
         }
       }
 
       // ===== SELL LOGIC =====
-      if (mlRecommendation.toUpperCase() === "SELL" && existingHolding && existingHolding.isAutoTraded) {
+      if (
+        mlRecommendation.toUpperCase() === "SELL" && 
+        existingHolding && 
+        existingHolding.isAutoTraded
+      ) {
         const quantityToSell = existingHolding.quantity;
         const sellPrice = price;
         const proceeds = quantityToSell * sellPrice;
-        const autoFundPortion = proceeds * 0.5;
-        const balancePortion = proceeds - autoFundPortion;
+        
+        // Calculate the cost basis (what we invested)
+        const costBasis = existingHolding.avg_price * quantityToSell;
 
         try {
+          // Create sell order
           const newOrder = await OrdersModel.create({
             user: userId,
             name: symbol,
@@ -345,36 +198,51 @@ async function runAutoTrade() {
             autoTradeEnabled: true,
             executed: true,
           });
-          await UsersModel.findByIdAndUpdate(userId, { $push: { orders: newOrder._id } });
+          await UsersModel.findByIdAndUpdate(userId, { 
+            $push: { orders: newOrder._id } 
+          });
 
+          // Remove holding
           await HoldingsModel.deleteOne({ _id: existingHolding._id });
-          await UsersModel.findByIdAndUpdate(userId, { $pull: { holdings: existingHolding._id } });
+          await UsersModel.findByIdAndUpdate(userId, { 
+            $pull: { holdings: existingHolding._id } 
+          });
 
-          user.balance += balancePortion;
-          user.autoTradeFund += autoFundPortion;
+          // Return proceeds to balance (user can use it freely)
+          user.balance += proceeds;
           await user.save();
-
-          remainingAutoBalance += quantityToSell * existingHolding.avg_price;
-          investedAutoBalance -= quantityToSell * existingHolding.avg_price;
+          
+          // The freed-up cost basis goes back to available auto-trade fund
+          currentRemainingBalance += costBasis;
 
           console.log(`✅ Auto-Sell executed: ${symbol} (${quantityToSell} shares at ₹${sellPrice})`);
+          console.log(`💰 Proceeds (₹${proceeds.toFixed(2)}) → balance`);
+          console.log(`🔄 Cost basis (₹${costBasis.toFixed(2)}) freed for auto-trading`);
         } catch (err) {
           console.log(`❌ Failed to execute SELL for ${symbol}:`, err.message);
         }
       }
     }
 
-    // Recalculate totals
+    // Recalculate user totals
     try {
       const userHoldings = await HoldingsModel.find({ user: userId });
-      const totalCurrentValue = userHoldings.reduce((acc, h) => acc + h.price * h.quantity, 0);
-      const totalInvested = userHoldings.reduce((acc, h) => acc + h.avg_price * h.quantity, 0);
+      const totalCurrentValue = userHoldings.reduce(
+        (acc, h) => acc + (h.price * h.quantity), 
+        0
+      );
+      const totalInvested = userHoldings.reduce(
+        (acc, h) => acc + (h.avg_price * h.quantity), 
+        0
+      );
       const totalPnL = totalCurrentValue - totalInvested;
 
       user.totalInvested = totalInvested;
       user.totalCurrentValue = totalCurrentValue;
       user.totalPnL = totalPnL;
       await user.save();
+      
+      console.log(`📈 Updated totals - Invested: ₹${totalInvested.toFixed(2)}, Current: ₹${totalCurrentValue.toFixed(2)}, P&L: ₹${totalPnL.toFixed(2)}`);
     } catch (err) {
       console.log("❌ Failed to update user totals:", err.message);
     }
