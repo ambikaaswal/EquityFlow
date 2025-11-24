@@ -1,10 +1,10 @@
-//This app contans one backend(Node + express) with two react apps named frontend and backend
+//This app contains one backend(Node + express) with two react apps named frontend and backend
 // and a ml-service for stock and sentiment prediction.
 
 //User flow:
-// frontend-> on login backend call for jwt verification-> on verification-> to dashboard->
-// dashboard-> calls made to backend for functionalities including ml service
-//->on logging out-> back to frontend.
+// Starting from frontend-> on signup+login, a backend call for jwt verification-> on verification-> to dashboard->
+// from dashboard-> calls made to backend for functionalities including ml service
+//From dashboard->on logging out-> back to frontend.
 
 //create an .env file for all dashboard, frontend and backend folders, where 
 //in backend's .env: you should have a db/atlas mongodb url, a frontend port url, a dashboard port url, a ml-service port url:
