@@ -73,16 +73,16 @@ const { syncHoldingsWithLivePrices } = require("./util/syncHoldings");
 })();
 
 // cron job for scheduled holdings and watchlist update:
-// const cron = require("node-cron");
-// cron.schedule("*/5 * * * *", async () => {
-//   try {
-//     console.log("Running holdings sync...");
-//     await updateWatchlist();
-//     await syncHoldingsWithLivePrices();
-//   } catch (err) {
-//     console.error("Cron job failed:", err.message);
-//   }
-// });
+const cron = require("node-cron");
+cron.schedule("*/5 * * * *", async () => {
+  try {
+    console.log("Running holdings sync...");
+    await updateWatchlist();
+    await syncHoldingsWithLivePrices();
+  } catch (err) {
+    console.error("Cron job failed:", err.message);
+  }
+});
 
 
 //manual trigger for autotrade:
