@@ -61,47 +61,6 @@ def fetch_nse_data(symbol, years=5):
         return None
 
 
-# Add at the top
-# from nsepython import nsefetch
-
-# def fetch_nse_data(symbol, years=5):
-#     """
-#     Fetch historical OHLCV data from NSE for the given symbol.
-#     Returns a DataFrame similar to yfinance format.
-#     """
-#     import pandas as pd
-#     import datetime
-
-#     end = datetime.datetime.today()
-#     start = end - datetime.timedelta(days=years*365)
-
-#     url = f"https://www.nseindia.com/api/quote-equity?symbol={symbol.replace('.NS','')}"
-    
-#     try:
-#         data = nsefetch(url)  # returns dict with historical data
-#         # The API may need 'historical' endpoint:
-#         hist_url = f"https://www.nseindia.com/api/historical/cm/equity?symbol={symbol.replace('.NS','')}&series=[\"EQ\"]&from={start.strftime('%d-%m-%Y')}&to={end.strftime('%d-%m-%Y')}"
-#         hist = nsefetch(hist_url)
-#         df = pd.DataFrame(hist['data'])
-#         df.rename(columns={
-#             'CH_DATE': 'Date',
-#             'CH_OPENING_PRICE': 'Open',
-#             'CH_CLOSING_PRICE': 'Close',
-#             'CH_HIGH_PRICE': 'High',
-#             'CH_LOW_PRICE': 'Low',
-#             'CH_TOTTRDQTY': 'Volume'
-#         }, inplace=True)
-#         df['Date'] = pd.to_datetime(df['Date'], format='%d-%b-%Y')
-#         df.set_index('Date', inplace=True)
-#         df = df[['Open','High','Low','Close','Volume']].sort_index()
-#         df = df.apply(pd.to_numeric, errors='coerce')
-#         df.dropna(inplace=True)
-#         return df
-#     except Exception as e:
-#         print(f"⚠️ Failed to fetch NSE data for {symbol}: {e}")
-#         return None
-
-
 
 def cleanup_old_models(symbol_prefix, keep_last=2):
     """Delete older model files"""
@@ -253,11 +212,11 @@ def train_model(symbol="RELIANCE.NS", years=5):
     y = df["target"]
     
     if len(X) < 100:
-        print(f"⚠️  Skipping {symbol}: not enough samples after feature engineering")
+        print(f" Skipping {symbol}: not enough samples after feature engineering")
         return None
     
     # Class distribution
-    print(f"\n📊 Target distribution:")
+    print(f"\n Target distribution:")
     print(y.value_counts())
     print(f"Class balance: {y.value_counts(normalize=True)}")
     
@@ -266,8 +225,8 @@ def train_model(symbol="RELIANCE.NS", years=5):
         X, y, test_size=0.3, stratify=y, random_state=42
     )
     
-    print(f"\n📈 Training samples: {len(X_train)}")
-    print(f"📉 Testing samples: {len(X_test)}")
+    print(f"\n Training samples: {len(X_train)}")
+    print(f" Testing samples: {len(X_test)}")
     
     # Rebalance training data
     train_df = pd.concat([X_train, y_train], axis=1)
@@ -292,7 +251,7 @@ def train_model(symbol="RELIANCE.NS", years=5):
     X_test_scaled = scaler.transform(X_test)
     
     # Train RandomForest model
-    print(f"\n🤖 Training RandomForest model...")
+    print(f"\n Training RandomForest model...")
     model = RandomForestClassifier(
         n_estimators=200,
         class_weight='balanced',
@@ -310,7 +269,7 @@ def train_model(symbol="RELIANCE.NS", years=5):
     bal_acc = balanced_accuracy_score(y_test, y_pred)
     
     print(f"\n{'='*60}")
-    print(f"📊 EVALUATION RESULTS")
+    print(f" EVALUATION RESULTS")
     print(f"{'='*60}")
     print(f"Accuracy: {acc:.3f}")
     print(f"Balanced Accuracy: {bal_acc:.3f}")

@@ -1,0 +1,32 @@
+{
+  "symbol": "LT.NS",
+  "trained_at": "20260429T212105Z",
+  "features": [
+    "Close",
+    "pct_change",
+    "vol_pct_change",
+    "sma_5",
+    "sma_10",
+    "sma_20",
+    "sma_50",
+    "rsi_14",
+    "macd",
+    "macd_diff",
+    "macd_signal",
+    "bb_high",
+    "bb_low",
+    "bb_width",
+    "atr",
+    "momentum_5",
+    "momentum_10",
+    "volume_ratio",
+    "close_position"
+  ],
+  "accuracy": 0.48732394366197185,
+  "balanced_accuracy": 0.4950438429279451,
+  "model_type": "RandomForest",
+  "prediction_type": "binary_daily",
+  "target": "next_day_direction",
+  "model_file": "LT_model_20260429T212105Z.pkl",
+  "scaler_file": "LT_scaler_20260429T212105Z.pkl"
+}
