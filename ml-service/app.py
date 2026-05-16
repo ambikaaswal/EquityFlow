@@ -1,5 +1,7 @@
 
 # app.py - SIMPLE BINARY PREDICTIONS WITH SENTIMENT
+
+print("STEP 1: imports starting")
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 import joblib
@@ -12,8 +14,9 @@ import datetime
 from train_stock import engineer_features, train_model
 from news_Sentiment import get_company_sentiment
 
+print("STEP 2: imports finished")
 app = FastAPI(title="EquityFlow ML Service")
-
+print("STEP 3: creating FastAPI app")
 MODEL_DIR = "models"
 
 # Simple thresholds
@@ -26,6 +29,7 @@ class PredictRequest(BaseModel):
 
 def load_latest_artifacts(symbol: str):
     """Load most recent model artifacts"""
+    print("STEP 5: loading models")
     prefix = symbol.split(".")[0].upper()
     metas = [f for f in os.listdir(MODEL_DIR) 
              if f.endswith(".json") and prefix in f.upper() and "latest" not in f]
@@ -113,9 +117,9 @@ def predict(payload: PredictRequest, background_tasks: BackgroundTasks):
     price_signal = "UP" if prob_up > 0.5 else "DOWN"
     price_confidence = max(prob_up, prob_down)
     
-    # ========================================
+
     # SENTIMENT ANALYSIS (Separate from Model)
-    # ========================================
+  
     sentiment_value = 0.0
     sentiment_articles = []
     sentiment_adjustment = 0.0
