@@ -26,7 +26,7 @@ async function updateStocks() {
 
     const stocks = response.data.data;
     if (!stocks || !stocks.length) throw new Error("No data from NSE");
-    console.log(`✅ Got ${stocks.length} stocks from NSE.`);
+    console.log(` Got ${stocks.length} stocks from NSE.`);
 
     // 2️ Clear old data
     await StocksModel.deleteMany({});
@@ -40,7 +40,7 @@ async function updateStocks() {
 
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
-          const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+          const BACKEND_URL = process.env.BACKEND_URL;
           const mlResponse = await axios.post(
             `${BACKEND_URL}/mlservice/predict`,
             { symbol, force_retrain: false },
