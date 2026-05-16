@@ -366,6 +366,6 @@ if __name__ == "__main__":
     
     if result:
         print(f"\n{'='*60}")
-        print(f"✅ Training completed for {result['symbol']}")
-        print(f"📊 Final Balanced Accuracy: {result['balanced_accuracy']:.1%}")
+        print(f" Training completed for {result['symbol']}")
+        print(f" Final Balanced Accuracy: {result['balanced_accuracy']:.1%}")
         print(f"{'='*60}")

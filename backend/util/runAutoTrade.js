@@ -4,16 +4,16 @@ const { HoldingsModel } = require("../models/HoldingsModel");
 const { StocksModel } = require("../models/StocksModel");
 
 async function runAutoTrade() {
-  console.log("🚀 Running Auto trade");
+  console.log(" Running Auto trade");
 
   const users = await UsersModel.find({ autoTradingEnabled: true });
   if (!users.length) {
-    console.log("⚠️ No auto-trading users found");
+    console.log(" No auto-trading users found");
     return;
   }
 
   for (const user of users) {
-    console.log(`\n👤 Processing user: ${user.username}`);
+    console.log(`\n Processing user: ${user.username}`);
     const { _id: userId, autoTradeLimitPercent } = user;
 
     // Initialize AutoTradeFund ONLY if it hasn't been set yet (first time enabling)
@@ -25,7 +25,7 @@ async function runAutoTrade() {
       });
       
       if (orphanedHoldings.length > 0) {
-        console.log(`⚠️ Found ${orphanedHoldings.length} orphaned auto-trade holdings. Clearing...`);
+        console.log(` Found ${orphanedHoldings.length} orphaned auto-trade holdings. Clearing...`);
         // Mark them as manual holdings instead of deleting
         await HoldingsModel.updateMany(
           { user: userId, isAutoTraded: true },
@@ -37,7 +37,7 @@ async function runAutoTrade() {
       user.autoTradeFund = fund;
       user.balance -= fund;
       await user.save();
-      console.log(`✅ Initialized AutoTradeFund: ₹${user.autoTradeFund}`);
+      console.log(` Initialized AutoTradeFund: ₹${user.autoTradeFund}`);
     }
 
     // Calculate available auto-trade balance
@@ -51,22 +51,22 @@ async function runAutoTrade() {
     
     const remainingAutoBalance = user.autoTradeFund - investedAutoBalance;
 
-    console.log(`💰 AutoTradeFund: ₹${user.autoTradeFund.toFixed(2)}`);
-    console.log(`📊 Invested: ₹${investedAutoBalance.toFixed(2)}`);
-    console.log(`💵 Remaining: ₹${remainingAutoBalance.toFixed(2)}`);
+    console.log(` AutoTradeFund: ₹${user.autoTradeFund.toFixed(2)}`);
+    console.log(`Invested: ₹${investedAutoBalance.toFixed(2)}`);
+    console.log(` Remaining: ₹${remainingAutoBalance.toFixed(2)}`);
 
     if (remainingAutoBalance <= 0) {
-      console.log("⚠️ No remaining auto-trade balance");
+      console.log(" No remaining auto-trade balance");
       continue;
     }
 
     const stocks = await StocksModel.find({ autoTradeEnabled: true });
     if (!stocks.length) {
-      console.log("⚠️ No eligible stocks found for trading.");
+      console.log(" No eligible stocks found for trading.");
       continue;
     }
 
-    console.log(`📈 Eligible stocks: ${stocks.map(s => s.symbol).join(", ")}`);
+    console.log(` Eligible stocks: ${stocks.map(s => s.symbol).join(", ")}`);
 
     const boughtStocksThisCycle = new Set();
     let currentRemainingBalance = remainingAutoBalance;
@@ -76,12 +76,12 @@ async function runAutoTrade() {
 
       // Skip outdated predictions (older than 24 hours)
       if (Date.now() - new Date(lastPredictedAt) > 24 * 60 * 60 * 1000) {
-        console.log(`⏰ Skipping ${symbol}: Prediction too old`);
+        console.log(` Skipping ${symbol}: Prediction too old`);
         continue;
       }
       
       if (confidence < 0.6) {
-        console.log(`📉 Skipping ${symbol}: Low confidence (${confidence})`);
+        console.log(` Skipping ${symbol}: Low confidence (${confidence})`);
         continue;
       }
 
@@ -107,7 +107,7 @@ async function runAutoTrade() {
         
         // Skip if can't afford even 1 share
         if (quantity < 1) {
-          console.log(`⚠️ Skipped BUY ${symbol}: Can't afford 1 share (Price: ₹${price}, Available: ₹${currentRemainingBalance.toFixed(2)})`);
+          console.log(` Skipped BUY ${symbol}: Can't afford 1 share (Price: ₹${price}, Available: ₹${currentRemainingBalance.toFixed(2)})`);
           continue;
         }
 
@@ -144,7 +144,7 @@ async function runAutoTrade() {
             existingHolding.isAutoTraded = true; // Mark as auto-traded
             await existingHolding.save();
             
-            console.log(`📊 Updated holding ${symbol}: ${newQuantity} shares @ avg ₹${newAvgPrice.toFixed(2)}`);
+            console.log(` Updated holding ${symbol}: ${newQuantity} shares @ avg ₹${newAvgPrice.toFixed(2)}`);
           } else {
             const newHolding = await HoldingsModel.create({
               user: userId,
@@ -167,9 +167,9 @@ async function runAutoTrade() {
           currentRemainingBalance -= totalCost;
           boughtStocksThisCycle.add(symbol);
           
-          console.log(`✅ Auto-Buy executed: ${symbol} (${quantity} shares at ₹${price}, Cost: ₹${totalCost.toFixed(2)})`);
+          console.log(` Auto-Buy executed: ${symbol} (${quantity} shares at ₹${price}, Cost: ₹${totalCost.toFixed(2)})`);
         } catch (err) {
-          console.log(`❌ Failed to execute BUY for ${symbol}:`, err.message);
+          console.log(` Failed to execute BUY for ${symbol}:`, err.message);
         }
       }
 
@@ -215,11 +215,11 @@ async function runAutoTrade() {
           // The freed-up cost basis goes back to available auto-trade fund
           currentRemainingBalance += costBasis;
 
-          console.log(`✅ Auto-Sell executed: ${symbol} (${quantityToSell} shares at ₹${sellPrice})`);
-          console.log(`💰 Proceeds (₹${proceeds.toFixed(2)}) → balance`);
-          console.log(`🔄 Cost basis (₹${costBasis.toFixed(2)}) freed for auto-trading`);
+          console.log(`Auto-Sell executed: ${symbol} (${quantityToSell} shares at ₹${sellPrice})`);
+          console.log(` Proceeds (₹${proceeds.toFixed(2)}) → balance`);
+          console.log(` Cost basis (₹${costBasis.toFixed(2)}) freed for auto-trading`);
         } catch (err) {
-          console.log(`❌ Failed to execute SELL for ${symbol}:`, err.message);
+          console.log(` Failed to execute SELL for ${symbol}:`, err.message);
         }
       }
     }
@@ -242,13 +242,13 @@ async function runAutoTrade() {
       user.totalPnL = totalPnL;
       await user.save();
       
-      console.log(`📈 Updated totals - Invested: ₹${totalInvested.toFixed(2)}, Current: ₹${totalCurrentValue.toFixed(2)}, P&L: ₹${totalPnL.toFixed(2)}`);
+      console.log(` Updated totals - Invested: ₹${totalInvested.toFixed(2)}, Current: ₹${totalCurrentValue.toFixed(2)}, P&L: ₹${totalPnL.toFixed(2)}`);
     } catch (err) {
-      console.log("❌ Failed to update user totals:", err.message);
+      console.log("Failed to update user totals:", err.message);
     }
   }
 
-  console.log("\n✅ Auto Trade cycle completed.");
+  console.log("\n Auto Trade cycle completed.");
 }
 
 module.exports = runAutoTrade;

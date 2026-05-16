@@ -1,5 +1,5 @@
-//This app contains one backend(Node + express) with two react apps named frontend and backend
-// and a ml-service for stock and sentiment prediction.
+//This app contains one backend(Node + express) with two react apps named frontend and dashboard
+// and a ml-service for stock price and sentiment prediction.
 
 //User flow:
 // Starting from frontend-> on signup+login, a backend call for jwt verification-> on verification-> to dashboard->
@@ -29,8 +29,8 @@ const requireAuth = require("./Middlewares/AuthMiddleware")
 const PORT = process.env.PORT || 8000;
 const DB_URL = process.env.EQUITYFLOW_DB_URL;
 
-//5173: dashboard react app
-//5174: frontend react app
+//5174: dashboard react app
+//5173: frontend react app
 app.use(
   cors({
     // origin: ["http://localhost:5173"],
@@ -58,13 +58,13 @@ const { UsersModel } = require("./models/UsersModel");
 
 const {OrdersModel} = require("./models/OrdersModel");
 
-// 🔁 Run once immediately, intial sync for watchlist and holdings
+// Run once immediately, intial sync for watchlist and holdings
 //update/sync watchlist live from NSE:
 const {updateWatchlist} = require("./util/updateWatchlist");
 const { syncHoldingsWithLivePrices } = require("./util/syncHoldings");
 (async () => {
   try {
-    console.log("🚀 Initial holdings sync...");
+    console.log(" Initial holdings sync...");
     await updateWatchlist();
     await syncHoldingsWithLivePrices();
   } catch (err) {
@@ -304,13 +304,13 @@ const updateStocks = require("./util/updateStocks")
 const runAutoTrade = require("./util/runAutoTrade");
 
 
-//run every hour:
+//cron job for autotrade (run every hour):
 cron.schedule("0 * * * *", async () => {
   try {
-    console.log("⏰ Running hourly auto trade...");
+    console.log(" Running hourly auto trade...");
     await runAutoTrade();
   } catch (err) {
-    console.error("❌ Auto trade cron failed:", err.message);
+    console.error(" Auto trade cron failed:", err.message);
   }
 });
 
@@ -333,7 +333,7 @@ app.post('/autotrade', requireAuth, async(req,res) => {
       // Move remaining autoTradeFund to balance
       if (user.autoTradeFund > 0) {
         user.balance += user.autoTradeFund;
-        console.log(`💸 AutoTradeFund of ₹${user.autoTradeFund} moved to balance`);
+        console.log(` AutoTradeFund of ₹${user.autoTradeFund} moved to balance`);
         user.autoTradeFund = 0;
       }
       
@@ -350,7 +350,7 @@ app.post('/autotrade', requireAuth, async(req,res) => {
     await user.save();
 
     if (enabled) {
-      console.log("⚙️ Auto trade enabled — running first cycle...");
+      console.log(" Auto trade enabled — running first cycle...");
       await runAutoTrade();
     }
 
@@ -371,11 +371,11 @@ app.post('/autotrade', requireAuth, async(req,res) => {
 //update stocks model:
 app.post("/update-stocks", async (req, res) => {
   try {
-    console.log("🌀 Manual updateStocks triggered...");
+    console.log(" Manual updateStocks triggered...");
     await updateStocks();
     res.json({ success: true, message: "Stocks updated successfully" });
   } catch (err) {
-    console.error("❌ updateStocks failed:", err.message);
+    console.error(" updateStocks failed:", err.message);
     res.status(500).json({ success: false, message: "Failed to update stocks", error: err.message });
   }
 });
