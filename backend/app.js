@@ -28,15 +28,14 @@ const requireAuth = require("./Middlewares/AuthMiddleware")
 
 const PORT = process.env.PORT || 8000;
 const DB_URL = process.env.EQUITYFLOW_DB_URL;
+const FRONTEND_URL = process.env.FRONTEND_URL;
+const DASHBOARD_URL = process.env.DASHBOARD_URL
 
-//5174: dashboard react app
-//5173: frontend react app
 app.use(
   cors({
-    // origin: ["http://localhost:5173"],
     origin: [
-    "http://localhost:5173",
-    "http://localhost:5174"
+    FRONTEND_URL,
+    DASHBOARD_URL,
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,

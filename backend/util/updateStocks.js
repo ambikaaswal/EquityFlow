@@ -40,8 +40,9 @@ async function updateStocks() {
 
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
+          const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
           const mlResponse = await axios.post(
-            "http://localhost:8000/mlservice/predict",
+            `${BACKEND_URL}/mlservice/predict`,
             { symbol, force_retrain: false },
             { headers: { "Content-Type": "application/json" }, timeout: 20000 }
           );

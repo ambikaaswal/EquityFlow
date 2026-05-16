@@ -8,14 +8,6 @@ import axios from "axios";
 
 //data  from database:
 const Holdings = () => {
-  // const [allHoldings, setAllHoldings] = useState([]);
-  // useEffect(()=>{
-  //   axios.get("http://localhost:8000/allHoldings").then((res)=>{
-  //     // console.log(res.data);
-  //     setAllHoldings(res.data);
-  //   })
-  // },[]); //[] se ek hi baar run hoga.
-
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   const [user, setUser] = useState({});
   const { allHoldings, refreshHoldings } = useContext(GeneralContext);
