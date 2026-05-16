@@ -2,7 +2,7 @@
 import { Tooltip, Grow } from "@mui/material";
 import { useEffect, useContext, useState } from "react";
 import GeneralContext from "./GeneralContext";
-import { VerticalChart } from "./verticalChart";
+import { VerticalChart } from "./VerticalChart";
 import axios from "axios";
 // import { data } from "react-router-dom";
 
