@@ -37,30 +37,8 @@ Running FinBERT sentiment analysis on financial news
 Combining prediction confidence with sentiment score
 Saving confidence scores to MongoDB
 Periodic retraining using Cron jobs
-Architecture
-                        +--------------------+
-                        |    React Website   |
-                        | Login / Landing    |
-                        +---------+----------+
-                                  |
-                                  |
-                        +---------v----------+
-                        |   Express Backend  |
-                        |   REST API Server  |
-                        +---------+----------+
-                                  |
-              +-------------------+------------------+
-              |                                      |
-      +-------v-------+                      +--------v-------+
-      |   MongoDB     |                      |  Python ML     |
-      | Users         |                      |    Service     |
-      | Portfolio     |                      | Random Forest  |
-      | Transactions  |                      | FinBERT        |
-      +---------------+                      | Cron Jobs      |
-                                             +--------+-------+
-                                                      |
-                                                      |
-                                              Updates Confidence Scores
+
+
 Project Structure
 EquityFlow
 │
